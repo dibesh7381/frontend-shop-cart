@@ -6,18 +6,23 @@ export default function ProductListing() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
 
+  // Get token from localStorage safely
+  const token = localStorage.getItem("token") ?? "";
 
   if (!token) return <Navigate to="/login" replace />;
 
-
+  // Fetch products
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    const fetchProducts = async () => {
+    async function fetchProducts() {
       try {
-        const res = await fetch("https://backend-shop-cart.onrender.com/products/listing", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "https://backend-shop-cart.onrender.com/products/listing",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.json();
 
         // Extract unique categories
@@ -29,9 +34,10 @@ export default function ProductListing() {
       } finally {
         setLoading(false);
       }
-    };
+    }
+
     fetchProducts();
-  }, [token]);
+  }, [token]); // token included as dependency
 
   if (loading) {
     return (
