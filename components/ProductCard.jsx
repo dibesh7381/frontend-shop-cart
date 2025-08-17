@@ -1,132 +1,4 @@
-// import { useState } from "react";
 
-// export default function ProductCard({ product, onRefresh }) {
-//   const [editing, setEditing] = useState(false);
-//   const [form, setForm] = useState({
-//     name: product.name,
-//     details: product.details,
-//     quantity: product.quantity,
-//     category: product.category,
-//     file: null,
-//   });
-
-//   const handleChange = (e) => {
-//     const { name, value, files } = e.target;
-//     if (name === "file") setForm({ ...form, file: files[0] });
-//     else setForm({ ...form, [name]: value });
-//   };
-
-//   const handleUpdate = async (e) => {
-//     e.preventDefault();
-//     const fd = new FormData();
-//     fd.append("name", form.name);
-//     fd.append("details", form.details);
-//     fd.append("quantity", form.quantity);
-//     fd.append("category", form.category);
-//     if (form.file) fd.append("file", form.file);
-
-//     try {
-//       const res = await fetch(`http://localhost:5000/products/${product._id}`, {
-//         method: "PUT",
-//         body: fd,
-//       });
-//       const data = await res.json();
-//       if (res.ok) {
-//         alert("Product updated!");
-//         setEditing(false);
-//         onRefresh();
-//       } else alert(data.message);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   const handleDelete = async () => {
-//     if (!window.confirm("Are you sure?")) return;
-//     try {
-//       const res = await fetch(`http://localhost:5000/products/${product._id}`, {
-//         method: "DELETE",
-//       });
-//       const data = await res.json();
-//       if (res.ok) onRefresh();
-//       else alert(data.message);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   return (
-//     <div className="bg-white shadow rounded overflow-hidden flex flex-col">
-//       {/* Bigger image container with auto height based on aspect ratio */}
-//       <div className="w-full h-64 flex items-center justify-center bg-gray-100 overflow-hidden">
-//         <img
-//           src={`http://localhost:5000${product.imageUrl}`}
-//           alt={product.name}
-//           className="w-full h-full object-contain"
-//         />
-//       </div>
-
-//       <div className="p-4 flex flex-col flex-1">
-//         {editing ? (
-//           <form className="space-y-2" onSubmit={handleUpdate}>
-//             <input
-//               name="name"
-//               value={form.name}
-//               onChange={handleChange}
-//               className="w-full p-1 border rounded"
-//               required
-//             />
-//             <textarea
-//               name="details"
-//               value={form.details}
-//               onChange={handleChange}
-//               className="w-full p-1 border rounded"
-//               required
-//             />
-//             <input
-//               name="category"
-//               value={form.category}
-//               onChange={handleChange}
-//               className="w-full p-1 border rounded"
-//               required
-//             />
-//             <input
-//               type="number"
-//               name="quantity"
-//               value={form.quantity}
-//               min={1}
-//               onChange={handleChange}
-//               className="w-full p-1 border rounded"
-//               required
-//             />
-//             <input type="file" name="file" onChange={handleChange} className="w-full p-1 border rounded" />
-//             <button type="submit" className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded mt-1">
-//               Save
-//             </button>
-//             <button type="button" onClick={() => setEditing(false)} className="bg-gray-400 hover:bg-gray-500 text-white py-1 px-2 rounded mt-1">
-//               Cancel
-//             </button>
-//           </form>
-//         ) : (
-//           <>
-//             <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-//             <p className="text-gray-600 text-sm mb-1">{product.details}</p>
-//             <p className="text-gray-600 text-sm mb-1">Category: {product.category}</p>
-//             <p className="text-gray-800 font-medium mb-2">Quantity: {product.quantity}</p>
-//             <div className="flex gap-2">
-//               <button onClick={() => setEditing(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded">
-//                 Edit
-//               </button>
-//               <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded">
-//                 Delete
-//               </button>
-//             </div>
-//           </>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
 import { useState } from "react";
 import ConfirmModal from "./ConfirmModal";
 
@@ -159,7 +31,7 @@ export default function ProductCard({ product, onRefresh }) {
     if (form.file) fd.append("file", form.file);
 
     try {
-      const res = await fetch(`http://localhost:5000/products/${product._id}`, {
+      const res = await fetch(`https://backend-shop-cart.onrender.com/products/${product._id}`, {
         method: "PUT",
         body: fd,
       });
@@ -182,7 +54,7 @@ export default function ProductCard({ product, onRefresh }) {
     if (!product._id) return console.error("Product ID missing");
 
     try {
-      const res = await fetch(`http://localhost:5000/products/${product._id}`, {
+      const res = await fetch(`https://backend-shop-cart.onrender.com/products/${product._id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -204,7 +76,7 @@ export default function ProductCard({ product, onRefresh }) {
     <div className="bg-white shadow rounded overflow-hidden flex flex-col w-full md:w-auto">
       <div className="w-full h-64 flex items-center justify-center bg-gray-100 overflow-hidden">
         <img
-          src={` https://backend-shop-cart.onrender.com${product.imageUrl}`}
+          src={`https://backend-shop-cart.onrender.com${product.imageUrl}`}
           alt={product.name}
           className="w-full h-full object-contain"
         />
