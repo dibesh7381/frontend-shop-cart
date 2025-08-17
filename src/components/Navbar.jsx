@@ -4,9 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Navbar() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState(null);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const profileRef = useRef();
+  const desktopRef = useRef();
+  const mobileRef = useRef();
 
   const token = localStorage.getItem("token");
 
@@ -15,9 +17,12 @@ export default function Navbar() {
     if (!token) return;
     const fetchProfile = async () => {
       try {
-        const res = await fetch("https://backend-shop-cart.onrender.com/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "https://backend-shop-cart.onrender.com/profile",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.json();
         if (res.ok) setUserName(data.user.name);
       } catch (err) {
@@ -29,7 +34,8 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setProfileOpen(false);
+    setDesktopProfileOpen(false);
+    setMobileProfileOpen(false);
     setSidebarOpen(false);
     navigate("/"); // redirect to home page
   };
@@ -42,11 +48,14 @@ export default function Navbar() {
       : words[0][0].toUpperCase();
   };
 
-  // Click outside profile dropdown to close
+  // Click outside desktop profile dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
+      if (desktopRef.current && !desktopRef.current.contains(e.target)) {
+        setDesktopProfileOpen(false);
+      }
+      if (mobileRef.current && !mobileRef.current.contains(e.target)) {
+        setMobileProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -57,32 +66,76 @@ export default function Navbar() {
     <>
       {/* Navbar */}
       <nav className="p-4 bg-blue-900 text-white flex justify-between items-center shadow-md relative">
-        <Link to="/"><span className="font-bold text-xl">ShopCart</span></Link>
+        <Link to="/">
+          <span className="font-bold text-xl">ShopCart</span>
+        </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-4">
-          <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/seller" className="hover:underline">Seller</Link>
-          <Link to="/products" className="hover:underline">Products</Link> {/* New Route */}
-        </div>
+        <div className="hidden md:flex items-center space-x-4">
+          <Link to="/" className="hover:underline">
+            Home
+          </Link>
+          <Link to="/seller" className="hover:underline">
+            Seller
+          </Link>
+          <Link to="/products" className="hover:underline">
+            Products
+          </Link>
 
-        {/* Right side: Profile avatar + Hamburger */}
-        <div className="flex items-center space-x-3">
-          {token && (
-            <div ref={profileRef} className="relative">
+          {!token ? (
+            <>
+              <Link to="/signup" className="hover:underline">
+                Sign Up
+              </Link>
+              <Link to="/login" className="hover:underline">
+                Login
+              </Link>
+            </>
+          ) : (
+            <div ref={desktopRef} className="relative">
               <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none"
+                onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
+                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none ml-3"
               >
                 {getInitial(userName)}
               </button>
-
-              {profileOpen && (
+              {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link
                     to="/profile"
                     className="block px-4 py-2 text-white hover:bg-blue-700"
-                    onClick={() => setProfileOpen(false)}
+                    onClick={() => setDesktopProfileOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Hamburger + Avatar */}
+        <div className="flex md:hidden items-center space-x-2">
+          {token && (
+            <div ref={mobileRef} className="relative">
+              <button
+                onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
+                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none"
+              >
+                {getInitial(userName)}
+              </button>
+              {mobileProfileOpen && (
+                <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-white hover:bg-blue-700"
+                    onClick={() => setMobileProfileOpen(false)}
                   >
                     Profile
                   </Link>
@@ -97,10 +150,9 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden flex flex-col justify-between w-6 h-5 focus:outline-none ml-2"
+            className="flex flex-col justify-between w-6 h-5 focus:outline-none"
           >
             <span className="block h-0.5 w-full bg-white"></span>
             <span className="block h-0.5 w-full bg-white"></span>
@@ -125,7 +177,6 @@ export default function Navbar() {
           </button>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
-          {/* Always show Home, Seller & Products */}
           <Link
             to="/"
             className="px-4 py-3 hover:bg-blue-700"
@@ -148,8 +199,7 @@ export default function Navbar() {
             Products
           </Link>
 
-          {/* Conditional Sign Up & Login */}
-          {!token && (
+          {!token ? (
             <>
               <Link
                 to="/signup"
@@ -165,6 +215,22 @@ export default function Navbar() {
               >
                 Login
               </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/profile"
+                className="px-4 py-3 hover:bg-blue-700"
+                onClick={() => setSidebarOpen(false)}
+              >
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-left px-4 py-3 hover:bg-blue-700"
+              >
+                Logout
+              </button>
             </>
           )}
         </nav>
