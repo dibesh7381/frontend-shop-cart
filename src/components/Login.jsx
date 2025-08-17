@@ -3,10 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [notification, setNotification] = useState(null); // for toast
+  const [notification, setNotification] = useState(null); // inline message
   const navigate = useNavigate();
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = e =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -22,33 +23,39 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // show toast
       setNotification({ message: "Login successful!", type: "success" });
-      setTimeout(() => setNotification(null), 3000); // auto-hide after 3s
 
-      navigate("/"); // redirect to home
+      // redirect after short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (err) {
       setNotification({ message: err.message, type: "error" });
-      setTimeout(() => setNotification(null), 4000);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 relative">
-      {/* Toast Notification */}
-      {notification && (
-        <div
-          className={`fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white font-medium transition-transform duration-300 ${
-            notification.type === "success" ? "bg-green-500" : "bg-red-500"
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
+      <form
+        className="w-full max-w-md bg-white p-6 rounded-lg shadow-md"
+        onSubmit={handleSubmit}
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
+          Login
+        </h2>
 
-      {/* Login Form */}
-      <form className="w-full max-w-md bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Login</h2>
+        {/* Inline Notification */}
+        {notification && (
+          <p
+            className={`mb-4 text-center font-medium ${
+              notification.type === "success"
+                ? "text-green-600"
+                : "text-red-600"
+            }`}
+          >
+            {notification.message}
+          </p>
+        )}
 
         <input
           name="email"
@@ -73,10 +80,12 @@ export default function Login() {
           Login
         </button>
 
-        {/* Sign Up Link */}
         <p className="mt-4 text-center text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-green-500 font-semibold hover:underline">
+          Don&apos;t have an account?{" "}
+          <Link
+            to="/signup"
+            className="text-green-500 font-semibold hover:underline"
+          >
             Sign Up
           </Link>
         </p>

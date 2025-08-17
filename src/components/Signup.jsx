@@ -1,77 +1,101 @@
+
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [notification, setNotification] = useState(null); // for toast
+  const [errors, setErrors] = useState({}); // field-wise errors
   const navigate = useNavigate();
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" }); // clear error while typing
+  };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    let newErrors = {};
+
+    // basic validation before API call
+    if (!form.name) newErrors.name = "Name is required";
+    if (!form.email) newErrors.email = "Email is required";
+    if (!form.password) newErrors.password = "Password is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed");
 
-      // show toast
-      setNotification({ message: data.message, type: "success" });
-      setTimeout(() => setNotification(null), 3000);
+      const data = await res.json();
+      if (!res.ok) {
+        // API error → show below email or password input
+        setErrors({ general: data.message || "Signup failed" });
+        return;
+      }
 
       navigate("/login");
     } catch (err) {
-      setNotification({ message: err.message, type: "error" });
-      setTimeout(() => setNotification(null), 4000);
+      setErrors({ general: err.message });
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 relative">
-      {/* Toast Notification */}
-      {notification && (
-        <div
-          className={`fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white font-medium transition-transform duration-300 ${
-            notification.type === "success" ? "bg-green-500" : "bg-red-500"
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
-      {/* Signup Form */}
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white p-6 rounded-lg shadow-md"
       >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Sign Up</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          Sign Up
+        </h2>
 
+        {/* Name */}
         <input
           name="name"
           placeholder="Name"
           value={form.name}
           onChange={handleChange}
-          className="mb-4 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.name && <p className="text-red-500 text-sm mb-3">{errors.name}</p>}
+
+        {/* Email */}
         <input
           name="email"
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
-          className="mb-4 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.email && <p className="text-red-500 text-sm mb-3">{errors.email}</p>}
+
+        {/* Password */}
         <input
           name="password"
           placeholder="Password"
           type="password"
           value={form.password}
           onChange={handleChange}
-          className="mb-6 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.password && (
+          <p className="text-red-500 text-sm mb-3">{errors.password}</p>
+        )}
+
+        {/* General error (like API error) */}
+        {errors.general && (
+          <p className="text-red-600 text-center font-medium mb-3">
+            {errors.general}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -80,10 +104,12 @@ export default function Signup() {
           Sign Up
         </button>
 
-        {/* Login Link */}
         <p className="mt-4 text-center text-gray-600">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-blue-500 font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>
@@ -91,4 +117,3 @@ export default function Signup() {
     </div>
   );
 }
-
