@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import ConfirmModal from "./ConfirmModal"; // ensure correct path
+import ConfirmModal from "./ConfirmModal";
 
 export default function ProductForm({ onRefresh }) {
   const [form, setForm] = useState({
@@ -7,14 +7,15 @@ export default function ProductForm({ onRefresh }) {
     details: "",
     quantity: 1,
     category: "",
-    price: "", // ✅ Indian price
+    price: "",
     file: null,
   });
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
-
   const fileInputRef = useRef(null);
+
+  const token = localStorage.getItem("token"); // ✅ token lena zaroori hai
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -40,22 +41,25 @@ export default function ProductForm({ onRefresh }) {
     fd.append("details", form.details);
     fd.append("quantity", form.quantity);
     fd.append("category", form.category);
-    fd.append("price", form.price); // ✅ append price
+    fd.append("price", form.price);
     fd.append("file", form.file);
 
     try {
-      const res = await fetch(" https://backend-shop-cart.onrender.com/products", {
+      const res = await fetch("https://backend-shop-cart.onrender.com/products", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ token header me bhejna
+        },
         body: fd,
       });
+
       const data = await res.json();
       if (res.ok) {
-        // Reset state
         setForm({ name: "", details: "", quantity: 1, category: "", price: "", file: null });
         if (fileInputRef.current) fileInputRef.current.value = null;
         onRefresh();
       } else {
-        setConfirmMessage(data.message);
+        setConfirmMessage(data.message || "Something went wrong");
         setShowConfirm(true);
       }
     } catch (err) {
@@ -136,7 +140,6 @@ export default function ProductForm({ onRefresh }) {
         </button>
       </form>
 
-      {/* Confirm Modal */}
       <ConfirmModal
         open={showConfirm}
         message={confirmMessage}
@@ -146,7 +149,6 @@ export default function ProductForm({ onRefresh }) {
     </>
   );
 }
-
 
 // import { useState, useRef } from "react";
 

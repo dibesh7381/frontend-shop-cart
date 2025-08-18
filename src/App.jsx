@@ -7,6 +7,7 @@ import Profile from "./components/Profile.jsx";
 import ProductDashboard from "./components/ProductDashboard.jsx"
 import Home from "./components/Home.jsx";
 import ProductListing from "./components/ProductListing.jsx";
+import SellerDashboard from "../components/SellerDashboard.jsx";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/seller" element={<ProductDashboard />} />
         <Route path="/products" element={<ProductListing />} />
+        <Route path="/seller-dashboard" element={<SellerDashboard/>} />
       </Routes>
     </div>
   );
