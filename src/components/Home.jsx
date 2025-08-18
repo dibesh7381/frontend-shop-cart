@@ -1,39 +1,95 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-4">Welcome!</h1>
-      <p className="text-gray-700 mb-6 text-center">
-        This is your Home Page. You can add your dashboard, products, or any other content here.
-      </p>
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUser(null); // logout state
+        setLoading(false);
+        return;
+      }
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl mb-6">
-        <div className="bg-white p-4 rounded shadow hover:shadow-lg transition">
-          <h2 className="font-bold text-lg mb-2">Dashboard</h2>
-          <p className="text-gray-600">View your dashboard and stats.</p>
-        </div>
+      try {
+        const res = await fetch("https://backend-shop-cart.onrender.com/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Error fetching profile");
 
-        <div className="bg-white p-4 rounded shadow hover:shadow-lg transition">
-          <h2 className="font-bold text-lg mb-2">Products</h2>
-          <p className="text-gray-600">Manage your products and inventory.</p>
-        </div>
+        setUser(data.user);
+      } catch (err) {
+        console.error(err.message);
+        setUser(null); // agar token invalid ho toh logout state
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        <div className="bg-white p-4 rounded shadow hover:shadow-lg transition">
-          <h2 className="font-bold text-lg mb-2">Profile</h2>
-          <p className="text-gray-600">View or edit your profile information.</p>
-        </div>
+    fetchProfile();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
       </div>
+    );
 
-      {/* View Products Button */}
-      <button
-        onClick={() => navigate("/products")}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded transition-colors"
-      >
-        View Products
-      </button>
+  const handleClick = () => {
+    if (!user) return;
+    if (user.role === "seller") navigate("/seller");
+    else navigate("/products");
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      {!user ? (
+        // Logged out view
+        <div className="p-8 rounded-xl shadow-lg bg-purple-50 text-center text-purple-800 max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4">Welcome to ShopCart!</h2>
+          <p className="text-base mb-6">
+            🚀 Explore amazing products or start selling with your own dashboard. Please login or signup to continue.
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+          >
+            Login / Signup
+          </button>
+        </div>
+      ) : user.role === "seller" ? (
+        <div className="p-8 rounded-xl shadow-lg bg-green-100 text-center text-green-800 max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4">Welcome Seller, {user.name}!</h2>
+          <p className="text-base mb-6">
+            🎉 Manage your products, view your dashboard, and grow your business.
+          </p>
+          <button
+            onClick={handleClick}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            Go to Seller Dashboard
+          </button>
+        </div>
+      ) : (
+        <div className="p-8 rounded-xl shadow-lg bg-blue-100 text-center text-blue-800 max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4">Hello {user.name}!</h2>
+          <p className="text-base mb-6">
+            👤 Browse products, add to cart, and enjoy shopping!
+          </p>
+          <button
+            onClick={handleClick}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Go to Products
+          </button>
+        </div>
+      )}
     </div>
   );
 }
