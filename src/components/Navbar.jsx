@@ -1,43 +1,22 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar({ user, setUser }) {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState(null);
   const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const desktopRef = useRef();
   const mobileRef = useRef();
 
-  const token = localStorage.getItem("token");
-
-  // Fetch profile name
-  useEffect(() => {
-    if (!token) return;
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(
-          "https://backend-shop-cart.onrender.com/profile",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await res.json();
-        if (res.ok) setUserName(data.user.name);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchProfile();
-  }, [token]);
-
+  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
+    setUser(null); // update parent state immediately
     setDesktopProfileOpen(false);
     setMobileProfileOpen(false);
     setSidebarOpen(false);
-    navigate("/"); // redirect to home page
+    navigate("/"); // redirect to home
   };
 
   const getInitial = (name) => {
@@ -48,7 +27,7 @@ export default function Navbar() {
       : words[0][0].toUpperCase();
   };
 
-  // Click outside desktop profile dropdown
+  // Click outside profile dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (desktopRef.current && !desktopRef.current.contains(e.target)) {
@@ -82,7 +61,7 @@ export default function Navbar() {
             Products
           </Link>
 
-          {!token ? (
+          {!user ? (
             <>
               <Link to="/signup" className="hover:underline">
                 Sign Up
@@ -97,7 +76,7 @@ export default function Navbar() {
                 onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
                 className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none ml-3"
               >
-                {getInitial(userName)}
+                {getInitial(user.name)}
               </button>
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
@@ -122,13 +101,13 @@ export default function Navbar() {
 
         {/* Mobile Hamburger + Avatar */}
         <div className="flex md:hidden items-center space-x-2">
-          {token && (
+          {user && (
             <div ref={mobileRef} className="relative">
               <button
                 onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
                 className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none"
               >
-                {getInitial(userName)}
+                {getInitial(user.name)}
               </button>
               {mobileProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
@@ -161,7 +140,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Slide-in Sidebar */}
+      {/* Sidebar */}
       <div
         className={`fixed top-0 right-0 h-full w-64 bg-blue-800 text-white transform transition-transform duration-300 z-50 shadow-lg ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
@@ -199,7 +178,7 @@ export default function Navbar() {
             Products
           </Link>
 
-          {!token ? (
+          {!user ? (
             <>
               <Link
                 to="/signup"
