@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import ConfirmModal from "./ConfirmModal";
 
@@ -13,6 +12,9 @@ export default function ProductCard({ product, onRefresh }) {
     price: product.price || 0,
     file: null,
   });
+
+  // ✅ Token from localStorage
+  const token = localStorage.getItem("token");
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -33,6 +35,9 @@ export default function ProductCard({ product, onRefresh }) {
     try {
       const res = await fetch(`https://backend-shop-cart.onrender.com/products/${product._id}`, {
         method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ token add
+        },
         body: fd,
       });
       const data = await res.json();
@@ -56,6 +61,9 @@ export default function ProductCard({ product, onRefresh }) {
     try {
       const res = await fetch(`https://backend-shop-cart.onrender.com/products/${product._id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ token add
+        },
       });
       const data = await res.json();
       console.log("Delete response:", res.status, data);
@@ -137,10 +145,17 @@ export default function ProductCard({ product, onRefresh }) {
               className="w-full p-2 border rounded"
             />
             <div className="flex gap-2 mt-2 flex-wrap">
-              <button type="submit" className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex-1">
+              <button
+                type="submit"
+                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex-1"
+              >
                 Save
               </button>
-              <button type="button" onClick={() => setEditing(false)} className="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded flex-1">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded flex-1"
+              >
                 Cancel
               </button>
             </div>
@@ -151,7 +166,9 @@ export default function ProductCard({ product, onRefresh }) {
             <p className="text-gray-600 text-sm mb-1">{product.details}</p>
             <p className="text-gray-600 text-sm mb-1">Category: {product.category}</p>
             <p className="text-gray-800 font-medium mb-1">Quantity: {product.quantity}</p>
-            <p className="text-gray-800 font-medium mb-2">Price: ₹{Number(product.price).toLocaleString("en-IN")}</p>
+            <p className="text-gray-800 font-medium mb-2">
+              Price: ₹{Number(product.price).toLocaleString("en-IN")}
+            </p>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setEditing(true)}
@@ -181,3 +198,4 @@ export default function ProductCard({ product, onRefresh }) {
     </div>
   );
 }
+
