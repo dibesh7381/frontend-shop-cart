@@ -1,9 +1,12 @@
+
+
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
 import ProductForm from "../../components/ProductForm";
 import ProductCard from "../../components/ProductCard";
+import withAuth from "./WithAuth";
 
-export default function Dashboard() {
+// eslint-disable-next-line react-refresh/only-export-components
+function Dashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -13,7 +16,7 @@ export default function Dashboard() {
       setLoading(true);
       const res = await fetch("https://backend-shop-cart.onrender.com/products", {
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ token bhej raha hu
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await res.json();
@@ -28,8 +31,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (token) loadProducts();
   }, [token]);
-
-  if (!token) return <Navigate to="/login" replace />;
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
@@ -61,3 +62,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+// ✅ only sellers can access
+// eslint-disable-next-line react-refresh/only-export-components
+export default withAuth(Dashboard, { requireSeller: true });
