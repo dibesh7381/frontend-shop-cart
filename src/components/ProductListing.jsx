@@ -152,32 +152,19 @@
 //   );
 // }
 
+// ProductListing.jsx
 import { useEffect, useState, useCallback } from "react";
+import withAuth from "./WithAuth";
 
-export default function ProductListing() {
+// eslint-disable-next-line react-refresh/only-export-components
+function ProductListing({ user }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token") ?? "";
+  const token = localStorage.getItem("token");
 
-  if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          You need to login
-        </h2>
-        <p className="text-gray-600">
-          Please login to view and purchase products.
-        </p>
-      </div>
-    );
-  }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch(
         "https://backend-shop-cart.onrender.com/products/listing",
@@ -189,41 +176,23 @@ export default function ProductListing() {
       setCategories(cats);
       setProducts(data);
     } catch (err) {
-      console.error("Error fetching products:", err);
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   }, [token]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
   const filteredProducts = products.filter((p) =>
     selectedCategory === "All" ? true : p.category === selectedCategory
   );
 
-  if (filteredProducts.length === 0) {
-    return (
-      <p className="text-center mt-10 text-gray-500">
-        No products available with selected filters
-      </p>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Products
+        Welcome, {user.name}! ({user.role})
+        <p className="mt-2">Products</p>
       </h2>
 
       {/* Category Filter */}
@@ -250,26 +219,19 @@ export default function ProductListing() {
             key={product._id}
             className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 duration-300 flex flex-col items-center overflow-hidden"
           >
-            {/* Image */}
             <div className="w-full p-4 flex justify-center items-center bg-gray-50">
               <img
-                src={product.imageUrl} // ✅ direct Cloudinary URL
+                src={product.imageUrl}
                 alt={product.name}
                 className="w-full h-64 object-contain rounded-lg transition-transform duration-300 hover:scale-105"
               />
             </div>
-
-            {/* Name */}
             <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-1 self-start px-4">
               {product.name}
             </h3>
-
-            {/* Price */}
             <p className="text-lg font-semibold text-gray-800 mb-1 self-start px-4">
               ₹{product.price}
             </p>
-
-            {/* Quantity */}
             <p
               className={`text-sm font-medium mb-4 self-start px-4 ${
                 product.quantity > 0 ? "text-green-600" : "text-red-600"
@@ -283,21 +245,21 @@ export default function ProductListing() {
             {/* Buttons */}
             <div className="flex gap-3 w-full px-4 mb-4">
               <button
-                disabled={product.quantity <= 0}
+                disabled={user.role === "seller" || product.quantity <= 0}
                 className={`flex-1 font-semibold py-2 rounded-xl transition-colors ${
-                  product.quantity > 0
-                    ? "bg-green-500 hover:bg-green-600 text-white"
-                    : "bg-gray-400 cursor-not-allowed text-white"
+                  user.role === "seller" || product.quantity <= 0
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-green-500 hover:bg-green-600 text-white"
                 }`}
               >
                 Add to Cart
               </button>
               <button
-                disabled={product.quantity <= 0}
+                disabled={user.role === "seller" || product.quantity <= 0}
                 className={`flex-1 font-semibold py-2 rounded-xl transition-colors ${
-                  product.quantity > 0
-                    ? "bg-blue-500 hover:bg-blue-600 text-white"
-                    : "bg-gray-400 cursor-not-allowed text-white"
+                  user.role === "seller" || product.quantity <= 0
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
                 }`}
               >
                 Buy Now
@@ -309,3 +271,10 @@ export default function ProductListing() {
     </div>
   );
 }
+
+// customer + seller dono access
+// eslint-disable-next-line react-refresh/only-export-components
+export default withAuth(ProductListing);
+
+
+
