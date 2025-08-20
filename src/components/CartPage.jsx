@@ -1,13 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-import {
-  removeFromCart,
-  decreaseQuantity,
-  increaseQuantity,
-  clearCart,
-} from "../redux/cartSlice";
+import { removeFromCart, decreaseQuantity, increaseQuantity, clearCart} from "../redux/cartSlice";
 
 export default function CartPage() {
   const cartItems = useSelector((state) => state.cart.items);
