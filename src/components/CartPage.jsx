@@ -1,5 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import {
   removeFromCart,
   decreaseQuantity,
@@ -10,6 +12,7 @@ import {
 export default function CartPage() {
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const totalPrice = cartItems.reduce(
@@ -56,17 +59,20 @@ export default function CartPage() {
           { method: "POST", headers: { Authorization: `Bearer ${token}` } }
         );
       }
-      dispatch(removeFromCart(item._id));
+      dispatch(removeFromCart(item._id)); // Remove single item
     } catch (err) {
       console.error(err);
       alert("Something went wrong!");
     }
   };
 
+  const handleRemoveAll = () => {
+    dispatch(clearCart()); // Remove all items
+  };
+
   const handleBuyAll = () => {
     if (!cartItems.length) return;
-    alert(`Purchased all items for ₹${totalPrice}`);
-    dispatch(clearCart());
+    navigate("/checkout"); // Navigate to checkout
   };
 
   if (!cartItems.length)
@@ -101,7 +107,6 @@ export default function CartPage() {
               <div className="flex flex-col justify-center w-full md:w-auto gap-2">
                 <h3 className="font-semibold text-lg">{item.name}</h3>
                 <p className="text-gray-700 font-semibold">₹{item.price}</p>
-                
 
                 {/* Quantity buttons */}
                 <div className="flex items-center gap-2 mt-2">
@@ -137,13 +142,7 @@ export default function CartPage() {
                   Remove
                 </button>
                 <button
-                  onClick={() =>
-                    alert(
-                      `Purchased ${item.name} for ₹${
-                        item.price * item.cartQuantity
-                      }`
-                    )
-                  }
+                  onClick={() => navigate("/checkout")}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex-1 md:flex-none"
                 >
                   Buy Now
@@ -154,16 +153,25 @@ export default function CartPage() {
         ))}
       </div>
 
-      {/* Total & Buy All */}
-      <div className="mt-6 flex flex-col items-center">
+      {/* Total, Buy All & Remove All */}
+      <div className="mt-6 flex flex-col items-center gap-3">
         <h3 className="text-xl font-bold">Total: ₹{totalPrice}</h3>
-        <button
-          onClick={handleBuyAll}
-          className="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
-        >
-          Buy All
-        </button>
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={handleBuyAll}
+            className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+          >
+            Buy All
+          </button>
+          <button
+            onClick={handleRemoveAll}
+            className="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
+          >
+            Remove All
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
