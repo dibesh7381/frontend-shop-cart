@@ -52,6 +52,7 @@ import Profile from "./components/Profile.jsx";
 import ProductDashboard from "./components/ProductDashboard.jsx";
 import Home from "./components/Home.jsx";
 import ProductListing from "./components/ProductListing.jsx";
+import CartPage from "./components/CartPage.jsx"; // ✅ Add this import
 import withAuth from "./components/WithAuth.jsx";
 
 const App = () => {
@@ -60,6 +61,8 @@ const App = () => {
   // Wrap components once
   const ProtectedProfile = withAuth(Profile, { requireSeller: false });
   const ProtectedSeller = withAuth(ProductDashboard, { requireSeller: true });
+  const ProtectedProducts = withAuth(ProductListing, { requireSeller: false });
+  const ProtectedCart = withAuth(CartPage, { requireSeller: false });
 
   return (
     <div>
@@ -73,7 +76,9 @@ const App = () => {
         <Route path="/profile" element={<ProtectedProfile />} />
         <Route path="/seller" element={<ProtectedSeller />} />
 
-        <Route path="/products" element={<ProductListing user={user} />} />
+        {/* Products & Cart */}
+        <Route path="/products" element={<ProtectedProducts user={user} />} />
+        <Route path="/cart" element={<ProtectedCart user={user} />} />
       </Routes>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function Navbar({ user, setUser }) {
   const navigate = useNavigate();
@@ -9,14 +10,16 @@ export default function Navbar({ user, setUser }) {
   const desktopRef = useRef();
   const mobileRef = useRef();
 
-  // Logout function
+  // 🔹 Calculate badge dynamically from cart items
+ const badgeCount = useSelector((state) => state.cart.items.length);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUser(null); // update parent state immediately
+    setUser(null);
     setDesktopProfileOpen(false);
     setMobileProfileOpen(false);
     setSidebarOpen(false);
-    navigate("/"); // redirect to home
+    navigate("/");
   };
 
   const getInitial = (name) => {
@@ -27,7 +30,6 @@ export default function Navbar({ user, setUser }) {
       : words[0][0].toUpperCase();
   };
 
-  // Click outside profile dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (desktopRef.current && !desktopRef.current.contains(e.target)) {
@@ -51,30 +53,32 @@ export default function Navbar({ user, setUser }) {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="hover:underline">
-            Home
-          </Link>
-          <Link to="/seller" className="hover:underline">
-            Seller
-          </Link>
-          <Link to="/products" className="hover:underline">
-            Products
-          </Link>
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/seller" className="hover:underline">Seller</Link>
+          <Link to="/products" className="hover:underline">Products</Link>
+
+          {/* Cart icon with badge */}
+          {user?.role === "customer" && (
+            <Link to="/cart" className="relative text-3xl">
+              🛒
+              {badgeCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {badgeCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {!user ? (
             <>
-              <Link to="/signup" className="hover:underline">
-                Sign Up
-              </Link>
-              <Link to="/login" className="hover:underline">
-                Login
-              </Link>
+              <Link to="/signup" className="hover:underline">Sign Up</Link>
+              <Link to="/login" className="hover:underline">Login</Link>
             </>
           ) : (
             <div ref={desktopRef} className="relative">
               <button
                 onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
-                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none ml-3"
+                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg ml-3"
               >
                 {getInitial(user.name)}
               </button>
@@ -99,13 +103,24 @@ export default function Navbar({ user, setUser }) {
           )}
         </div>
 
-        {/* Mobile Hamburger + Avatar */}
+        {/* Mobile Menu */}
         <div className="flex md:hidden items-center space-x-2">
+          {user?.role === "customer" && (
+            <Link to="/cart" className="relative text-3xl">
+              🛒
+              {badgeCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {badgeCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {user && (
             <div ref={mobileRef} className="relative">
               <button
                 onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
-                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg focus:outline-none"
+                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg"
               >
                 {getInitial(user.name)}
               </button>
@@ -129,6 +144,7 @@ export default function Navbar({ user, setUser }) {
             </div>
           )}
 
+          {/* Hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="flex flex-col justify-between w-6 h-5 focus:outline-none"
@@ -150,66 +166,25 @@ export default function Navbar({ user, setUser }) {
           <span className="font-bold text-lg">Menu</span>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-white text-2xl font-bold focus:outline-none"
+            className="text-white text-2xl font-bold"
           >
             &times;
           </button>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
-          <Link
-            to="/"
-            className="px-4 py-3 hover:bg-blue-700"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/seller"
-            className="px-4 py-3 hover:bg-blue-700"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Seller
-          </Link>
-          <Link
-            to="/products"
-            className="px-4 py-3 hover:bg-blue-700"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Products
-          </Link>
+          <Link to="/" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Home</Link>
+          <Link to="/seller" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Seller</Link>
+          <Link to="/products" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Products</Link>
 
           {!user ? (
             <>
-              <Link
-                to="/signup"
-                className="px-4 py-3 hover:bg-blue-700"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                className="px-4 py-3 hover:bg-blue-700"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Login
-              </Link>
+              <Link to="/signup" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Sign Up</Link>
+              <Link to="/login" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Login</Link>
             </>
           ) : (
             <>
-              <Link
-                to="/profile"
-                className="px-4 py-3 hover:bg-blue-700"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-left px-4 py-3 hover:bg-blue-700"
-              >
-                Logout
-              </button>
+              <Link to="/profile" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Profile</Link>
+              <button onClick={handleLogout} className="text-left px-4 py-3 hover:bg-blue-700">Logout</button>
             </>
           )}
         </nav>
