@@ -1,61 +1,50 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import ConfirmModal from "./ConfirmModal";
 
 export default function ProductForm({ onRefresh }) {
-  const [form, setForm] = useState({
-    name: "",
-    details: "",
-    quantity: 1,
-    category: "",
-    price: "",
-    file: null,
+  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
+    defaultValues: { name: "", details: "", quantity: 1, category: "", price: "" }
   });
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const fileInputRef = useRef(null);
+  const token = localStorage.getItem("token");
 
-  const token = localStorage.getItem("token"); // ✅ token lena zaroori hai
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "file") setForm({ ...form, file: files[0] });
-    else setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.file) {
-      setConfirmMessage("Please select an image");
+  const onSubmit = (data) => {
+    if (!data.file?.[0]) {
+      setConfirmMessage("Product image is required");
       setShowConfirm(true);
       return;
     }
+
     setConfirmMessage("Are you sure you want to add this product?");
     setShowConfirm(true);
   };
 
   const handleConfirm = async () => {
     setShowConfirm(false);
+
     const fd = new FormData();
-    fd.append("name", form.name);
-    fd.append("details", form.details);
-    fd.append("quantity", form.quantity);
-    fd.append("category", form.category);
-    fd.append("price", form.price);
-    fd.append("file", form.file);
+    const values = watch();
+    fd.append("name", values.name);
+    fd.append("details", values.details);
+    fd.append("quantity", values.quantity);
+    fd.append("category", values.category);
+    fd.append("price", values.price);
+    fd.append("file", values.file[0]);
 
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/products", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ token header me bhejna
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: fd,
       });
 
       const data = await res.json();
       if (res.ok) {
-        setForm({ name: "", details: "", quantity: 1, category: "", price: "", file: null });
+        reset();
         if (fileInputRef.current) fileInputRef.current.value = null;
         onRefresh();
       } else {
@@ -74,64 +63,83 @@ export default function ProductForm({ onRefresh }) {
   return (
     <>
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-6 rounded shadow max-w-md mx-auto flex flex-col gap-4"
       >
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Product Name"
-          className="border p-2 rounded"
-          required
-        />
-        <textarea
-          name="details"
-          value={form.details}
-          onChange={handleChange}
-          placeholder="Product Details"
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          placeholder="Category"
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="number"
-          name="quantity"
-          value={form.quantity}
-          min={1}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="number"
-          name="price"
-          value={form.price}
-          min={0}
-          step="0.01"
-          onChange={handleChange}
-          placeholder="Price in ₹"
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="file"
-          name="file"
-          ref={fileInputRef}
-          onChange={handleChange}
-          accept="image/*"
-          className="border p-2 rounded"
-          required
-        />
+        {/* Product Name */}
+        <div className="flex flex-col">
+          <input
+            type="text"
+            placeholder="Product Name"
+            className="border p-2 rounded"
+            {...register("name", { required: "Product name is required" })}
+          />
+          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+        </div>
+
+        {/* Product Details */}
+        <div className="flex flex-col">
+          <textarea
+            placeholder="Product Details"
+            className="border p-2 rounded"
+            {...register("details", { required: "Product details are required" })}
+          />
+          {errors.details && <p className="text-red-500 text-xs mt-1">{errors.details.message}</p>}
+        </div>
+
+        {/* Category */}
+        <div className="flex flex-col">
+          <input
+            type="text"
+            placeholder="Category"
+            className="border p-2 rounded"
+            {...register("category", { required: "Category is required" })}
+          />
+          {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
+        </div>
+
+        {/* Quantity */}
+        <div className="flex flex-col">
+          <input
+            type="number"
+            min={1}
+            className="border p-2 rounded"
+            {...register("quantity", {
+              required: "Quantity is required",
+              min: { value: 1, message: "Quantity must be at least 1" }
+            })}
+          />
+          {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
+        </div>
+
+        {/* Price */}
+        <div className="flex flex-col">
+          <input
+            type="number"
+            step="0.01"
+            min={0}
+            placeholder="Price in ₹"
+            className="border p-2 rounded"
+            {...register("price", {
+              required: "Price is required",
+              min: { value: 0, message: "Price cannot be negative" }
+            })}
+          />
+          {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price.message}</p>}
+        </div>
+
+        {/* File Upload */}
+        <div className="flex flex-col">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/jpg"
+            className="border p-2 rounded"
+            ref={fileInputRef}
+            {...register("file", { required: "Product image is required" })}
+          />
+          {errors.file && <p className="text-red-500 text-xs mt-1">{errors.file.message}</p>}
+        </div>
+
         <button
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"

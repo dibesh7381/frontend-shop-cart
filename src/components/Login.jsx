@@ -6,10 +6,10 @@ export default function Login() {
   const [notification, setNotification] = useState(null); // inline message
   const navigate = useNavigate();
 
-  const handleChange = e =>
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/login", {

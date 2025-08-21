@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { removeFromCart, decreaseQuantity, increaseQuantity, clearCart} from "../redux/cartSlice";
+import { removeFromCart, decreaseQuantity, increaseQuantity, clearCart } from "../redux/cartSlice";
 
 export default function CartPage() {
   const cartItems = useSelector((state) => state.cart.items);
@@ -53,20 +53,42 @@ export default function CartPage() {
           { method: "POST", headers: { Authorization: `Bearer ${token}` } }
         );
       }
-      dispatch(removeFromCart(item._id)); // Remove single item
+      dispatch(removeFromCart(item._id));
     } catch (err) {
       console.error(err);
       alert("Something went wrong!");
     }
   };
 
-  const handleRemoveAll = () => {
-    dispatch(clearCart()); // Remove all items
-  };
+  const handleRemoveAll = async () => {
+
+
+  if (!cartItems.length) return;
+
+  const items = cartItems.map((item) => ({ id: item._id,  quantity: item.cartQuantity }));
+
+
+  try {
+    await fetch("https://backend-shop-cart.onrender.com/products/increase-many", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ items })
+    });
+
+    dispatch(clearCart());
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong!");
+  }
+};
+
 
   const handleBuyAll = () => {
     if (!cartItems.length) return;
-    navigate("/checkout"); // Navigate to checkout
+    navigate("/checkout");
   };
 
   if (!cartItems.length)
@@ -86,23 +108,15 @@ export default function CartPage() {
             key={item._id}
             className="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-4 items-center gap-4"
           >
-            {/* Left: Image */}
             <div className="w-full md:w-32 h-40 md:h-32 flex-shrink-0 rounded-xl overflow-hidden">
-              <img
-                src={item.imageUrl}
-                alt={item.name}
-                className="w-full h-full object-contain"
-              />
+              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
             </div>
 
-            {/* Middle + Right: Info + Quantity + Buttons */}
             <div className="flex flex-1 flex-col md:flex-row w-full justify-between items-center md:items-start gap-4">
-              {/* Info + Quantity */}
               <div className="flex flex-col justify-center w-full md:w-auto gap-2">
                 <h3 className="font-semibold text-lg">{item.name}</h3>
                 <p className="text-gray-700 font-semibold">₹{item.price}</p>
 
-                {/* Quantity buttons */}
                 <div className="flex items-center gap-2 mt-2">
                   <button
                     onClick={() => handleDecrease(item)}
@@ -127,7 +141,6 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Remove & Buy Now Buttons */}
               <div className="flex flex-wrap md:flex-col gap-2 w-full md:w-auto justify-center md:justify-start mt-2 md:mt-0">
                 <button
                   onClick={() => handleRemove(item)}
@@ -147,7 +160,6 @@ export default function CartPage() {
         ))}
       </div>
 
-      {/* Total, Buy All & Remove All */}
       <div className="mt-6 flex flex-col items-center gap-3">
         <h3 className="text-xl font-bold">Total: ₹{totalPrice}</h3>
         <div className="flex gap-3 flex-wrap">
@@ -168,4 +180,3 @@ export default function CartPage() {
     </div>
   );
 }
-
