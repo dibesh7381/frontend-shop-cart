@@ -6,7 +6,11 @@ export default function ProductCard({ product, onRefresh }) {
   const [editing, setEditing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const token = localStorage.getItem("token");
-  const { register, handleSubmit, formState: { errors }} = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       name: product.name,
       details: product.details,
@@ -72,6 +76,35 @@ export default function ProductCard({ product, onRefresh }) {
     }
   };
 
+  const categories = [
+    "Soap",
+    "Dress",
+    "Electronics",
+    "Food",
+    "Books",
+    "Shoes",
+    "Cosmetics",
+    "Toys",
+    "Mobiles",
+    "Laptops",
+    "Watches",
+    "Bags",
+    "Home Decor",
+    "Furniture",
+    "Kitchen Appliances",
+    "Sports",
+    "Stationery",
+    "Jewelry",
+    "Hair Care",
+    "Skincare",
+    "Gaming",
+    "Pet Supplies",
+    "Music",
+    "Automotive",
+    "Baby Products",
+    "Health & Wellness",
+  ];
+
   return (
     <div className="bg-white shadow rounded overflow-hidden flex flex-col w-full md:w-auto">
       {/* Image */}
@@ -85,10 +118,7 @@ export default function ProductCard({ product, onRefresh }) {
 
       <div className="p-4 flex flex-col flex-1">
         {editing ? (
-          <form
-            className="space-y-2 w-full"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <form className="space-y-2 w-full" onSubmit={handleSubmit(onSubmit)}>
             {/* Name */}
             <div className="flex flex-col">
               <input
@@ -106,7 +136,9 @@ export default function ProductCard({ product, onRefresh }) {
             {/* Details */}
             <div className="flex flex-col">
               <textarea
-                {...register("details", { required: "Product details are required" })}
+                {...register("details", {
+                  required: "Product details are required",
+                })}
                 className="w-full p-2 border rounded"
                 placeholder="Product Details"
               />
@@ -119,18 +151,27 @@ export default function ProductCard({ product, onRefresh }) {
 
             {/* Category */}
             <div className="flex flex-col">
-              <input
+              <label className="mb-1 font-medium">Category</label>
+              <select
                 {...register("category", { required: "Category is required" })}
                 className="w-full p-2 border rounded"
-                placeholder="Category"
-              />
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Select Category
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
               {errors.category && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.category.message}
                 </p>
               )}
             </div>
-
             {/* Quantity */}
             <div className="flex flex-col">
               <input
@@ -179,7 +220,11 @@ export default function ProductCard({ product, onRefresh }) {
                   validate: (fileList) => {
                     if (!fileList?.[0]) return true;
                     const file = fileList[0];
-                    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+                    if (
+                      !["image/jpeg", "image/png", "image/jpg"].includes(
+                        file.type
+                      )
+                    ) {
                       return "Only JPG or PNG images allowed";
                     }
                     if (file.size > 2 * 1024 * 1024) {
@@ -218,8 +263,12 @@ export default function ProductCard({ product, onRefresh }) {
           <>
             <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
             <p className="text-gray-600 text-sm mb-1">{product.details}</p>
-            <p className="text-gray-600 text-sm mb-1">Category: {product.category}</p>
-            <p className="text-gray-800 font-medium mb-1">Quantity: {product.quantity}</p>
+            <p className="text-gray-600 text-sm mb-1">
+              Category: {product.category}
+            </p>
+            <p className="text-gray-800 font-medium mb-1">
+              Quantity: {product.quantity}
+            </p>
             <p className="text-gray-800 font-medium mb-2">
               Price: ₹{Number(product.price).toLocaleString("en-IN")}
             </p>

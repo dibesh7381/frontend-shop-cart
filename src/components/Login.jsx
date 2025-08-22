@@ -1,77 +1,88 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [notification, setNotification] = useState(null); // inline message
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm();
+
   const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(data),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const result = await res.json();
+      if (!res.ok) {
+        setError("apiError", { message: result.message || "Login failed" });
+        return;
+      }
 
-      setNotification({ message: "Login successful!", type: "success" });
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("user", JSON.stringify(result.user));
 
-      // redirect after short delay
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      // Show backend success message
+      setSuccessMessage(result.message || "Login successful");
+
+      // Redirect after short delay
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
-      setNotification({ message: err.message, type: "error" });
+      setError("apiError", { message: err.message });
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <form
-        className="w-full max-w-md bg-white p-6 rounded-lg shadow-md"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col gap-4"
       >
         <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
           Login
         </h2>
 
-        {/* Inline Notification */}
-        {notification && (
-          <p
-            className={`mb-4 text-center font-medium ${
-              notification.type === "success"
-                ? "text-green-600"
-                : "text-red-600"
-            }`}
-          >
-            {notification.message}
-          </p>
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email"
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Invalid email format",
+            },
+          })}
+          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          {...register("password", { required: "Password is required" })}
+          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+
+        {/* API Error */}
+        {errors.apiError && (
+          <p className="text-red-600 text-center font-medium">{errors.apiError.message}</p>
         )}
 
-        <input
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="mb-4 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <input
-          name="password"
-          placeholder="Password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          className="mb-6 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
+        {/* Success Message */}
+        {successMessage && (
+          <p className="text-green-600 text-center font-medium">{successMessage}</p>
+        )}
 
         <button
           type="submit"
@@ -81,11 +92,8 @@ export default function Login() {
         </button>
 
         <p className="mt-4 text-center text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link
-            to="/signup"
-            className="text-green-500 font-semibold hover:underline"
-          >
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-green-500 font-semibold hover:underline">
             Sign Up
           </Link>
         </p>
