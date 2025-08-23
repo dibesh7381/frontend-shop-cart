@@ -10,11 +10,34 @@ export default function Navbar({ user, setUser }) {
   const desktopRef = useRef();
   const mobileRef = useRef();
 
-  // 🔹 Calculate badge dynamically from cart items
- const badgeCount = useSelector((state) => state.cart.items.length);
+  // Cart badge
+  const badgeCount = useSelector((state) => state.cart.items.length);
+
+  // Navbar avatar
+  const [avatar, setAvatar] = useState(user?.profilePic || "");
+
+  // Update avatar immediately when user changes
+  useEffect(() => {
+    setAvatar(user?.profilePic || "");
+  }, [user]);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (desktopRef.current && !desktopRef.current.contains(e.target)) {
+        setDesktopProfileOpen(false);
+      }
+      if (mobileRef.current && !mobileRef.current.contains(e.target)) {
+        setMobileProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     setDesktopProfileOpen(false);
     setMobileProfileOpen(false);
@@ -30,36 +53,41 @@ export default function Navbar({ user, setUser }) {
       : words[0][0].toUpperCase();
   };
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (desktopRef.current && !desktopRef.current.contains(e.target)) {
-        setDesktopProfileOpen(false);
-      }
-      if (mobileRef.current && !mobileRef.current.contains(e.target)) {
-        setMobileProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const renderAvatar = () =>
+    avatar ? (
+      <img
+        src={avatar}
+        alt="avatar"
+        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md"
+      />
+    ) : (
+      <span className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+        {user ? getInitial(user.name) : "?"}
+      </span>
+    );
 
   return (
     <>
-      {/* Navbar */}
       <nav className="p-4 bg-blue-900 text-white flex justify-between items-center shadow-md relative">
         <Link to="/">
-          <span className="font-bold text-xl">ShopCart</span>
+          <span className="font-extrabold text-xl cursor-pointer">
+            ShopCart
+          </span>
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/seller" className="hover:underline">Seller</Link>
-          <Link to="/products" className="hover:underline">Products</Link>
+          <Link to="/" className="hover:underline cursor-pointer">
+            Home
+          </Link>
+          <Link to="/seller" className="hover:underline cursor-pointer">
+            Seller
+          </Link>
+          <Link to="/products" className="hover:underline cursor-pointer">
+            Products
+          </Link>
 
-          {/* Cart icon with badge */}
           {user?.role === "customer" && (
-            <Link to="/cart" className="relative text-3xl">
+            <Link to="/cart" className="relative text-3xl cursor-pointer">
               🛒
               {badgeCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -71,29 +99,33 @@ export default function Navbar({ user, setUser }) {
 
           {!user ? (
             <>
-              <Link to="/signup" className="hover:underline">Sign Up</Link>
-              <Link to="/login" className="hover:underline">Login</Link>
+              <Link to="/signup" className="hover:underline cursor-pointer">
+                Sign Up
+              </Link>
+              <Link to="/login" className="hover:underline cursor-pointer">
+                Login
+              </Link>
             </>
           ) : (
             <div ref={desktopRef} className="relative">
               <button
                 onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
-                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg ml-3"
+                className="ml-3 cursor-pointer"
               >
-                {getInitial(user.name)}
+                {renderAvatar()}
               </button>
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-white hover:bg-blue-700"
+                    className="block px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
                     onClick={() => setDesktopProfileOpen(false)}
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700"
+                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
                   >
                     Logout
                   </button>
@@ -106,10 +138,10 @@ export default function Navbar({ user, setUser }) {
         {/* Mobile Menu */}
         <div className="flex md:hidden items-center space-x-2">
           {user?.role === "customer" && (
-            <Link to="/cart" className="relative text-3xl">
+            <Link to="/cart" className="relative text-3xl cursor-pointer">
               🛒
               {badgeCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 font-extrabold bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {badgeCount}
                 </span>
               )}
@@ -120,22 +152,22 @@ export default function Navbar({ user, setUser }) {
             <div ref={mobileRef} className="relative">
               <button
                 onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
-                className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                className="cursor-pointer"
               >
-                {getInitial(user.name)}
+                {renderAvatar()}
               </button>
               {mobileProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-white hover:bg-blue-700"
+                    className="block px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
                     onClick={() => setMobileProfileOpen(false)}
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700"
+                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
                   >
                     Logout
                   </button>
@@ -144,10 +176,9 @@ export default function Navbar({ user, setUser }) {
             </div>
           )}
 
-          {/* Hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="flex flex-col justify-between w-6 h-5 focus:outline-none"
+            className="flex flex-col justify-between w-6 h-5 focus:outline-none cursor-pointer"
           >
             <span className="block h-0.5 w-full bg-white"></span>
             <span className="block h-0.5 w-full bg-white"></span>
@@ -166,25 +197,66 @@ export default function Navbar({ user, setUser }) {
           <span className="font-bold text-lg">Menu</span>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-white text-2xl font-bold"
+            className="text-white text-2xl font-bold cursor-pointer"
           >
             &times;
           </button>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
-          <Link to="/" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Home</Link>
-          <Link to="/seller" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Seller</Link>
-          <Link to="/products" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Products</Link>
+          <Link
+            to="/"
+            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            to="/seller"
+            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+          >
+            Seller
+          </Link>
+          <Link
+            to="/products"
+            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+          >
+            Products
+          </Link>
 
           {!user ? (
             <>
-              <Link to="/signup" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Sign Up</Link>
-              <Link to="/login" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Login</Link>
+              <Link
+                to="/signup"
+                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/login"
+                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+              >
+                Login
+              </Link>
             </>
           ) : (
             <>
-              <Link to="/profile" className="px-4 py-3 hover:bg-blue-700" onClick={() => setSidebarOpen(false)}>Profile</Link>
-              <button onClick={handleLogout} className="text-left px-4 py-3 hover:bg-blue-700">Logout</button>
+              <Link
+                to="/profile"
+                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+              >
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer"
+              >
+                Logout
+              </button>
             </>
           )}
         </nav>
@@ -192,3 +264,5 @@ export default function Navbar({ user, setUser }) {
     </>
   );
 }
+
+

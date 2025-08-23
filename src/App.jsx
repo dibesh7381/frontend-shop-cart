@@ -1,6 +1,4 @@
 
-
-
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
@@ -12,7 +10,9 @@ import Home from "./components/Home.jsx";
 import ProductListing from "./components/ProductListing.jsx";
 import CartPage from "./components/CartPage.jsx";
 import CheckoutPage from "./components/CheckoutPage.jsx";
+import AddressPage from "./components/AddressPage.jsx";
 import withAuth from "./components/WithAuth.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -25,7 +25,8 @@ const App = () => {
 
   return (
     <div>
-      <Navbar user={user} setUser={setUser} />
+      <ErrorBoundary>
+           <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route path="/" element={<Home user={user} setUser={setUser} />} />
         <Route path="/signup" element={<Signup />} />
@@ -39,7 +40,10 @@ const App = () => {
         <Route path="/products" element={<ProtectedProducts user={user} />} />
         <Route path="/cart" element={<ProtectedCart user={user} />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/address" element={<AddressPage />} />
       </Routes>
+      </ErrorBoundary>
+      
     </div>
   );
 };

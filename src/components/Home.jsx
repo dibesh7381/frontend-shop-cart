@@ -81,26 +81,26 @@ export default function Home({ user, setUser }) {
           </>
         ) : user.role === "seller" ? (
           <>
-            <h2 className="text-3xl font-bold mb-4">Welcome Seller, {user.name}!</h2>
+            <h2 className="text-3xl font-bold mb-4">Welcome Seller, {user.name}</h2>
             <p className="text-base mb-6">
               🎉 Manage your products, view your dashboard, and grow your business.
             </p>
             <button
               onClick={handleClick}
-              className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+              className="px-6 py-3 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition"
             >
               Go to Seller Dashboard
             </button>
           </>
         ) : (
           <>
-            <h2 className="text-3xl font-bold mb-4">Hello {user.name}!</h2>
+            <h2 className="text-3xl font-bold mb-4">Hello {user.name}</h2>
             <p className="text-base mb-6">
               👤 Browse products, add to cart, and enjoy shopping!
             </p>
             <button
               onClick={handleClick}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+              className="px-6 py-3 bg-blue-600 cursor-pointer text-white rounded-xl hover:bg-blue-700 transition"
             >
               Go to Products
             </button>

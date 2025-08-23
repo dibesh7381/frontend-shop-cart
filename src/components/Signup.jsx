@@ -1,16 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 
 export default function Signup() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); // ✅ Loading state
 
   const onSubmit = async (data) => {
+    setIsLoading(true);
+
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/signup", {
         method: "POST",
@@ -19,6 +18,7 @@ export default function Signup() {
       });
 
       const result = await res.json();
+
       if (!res.ok) {
         alert(result.message || "Signup failed");
         return;
@@ -27,6 +27,8 @@ export default function Signup() {
       navigate("/login");
     } catch (err) {
       alert(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,7 +42,6 @@ export default function Signup() {
           Sign Up
         </h2>
 
-        {/* Name */}
         <input
           type="text"
           placeholder="Name"
@@ -49,49 +50,37 @@ export default function Signup() {
         />
         {errors.name && <p className="text-red-500 text-sm mb-3">{errors.name.message}</p>}
 
-        {/* Email */}
         <input
           type="email"
           placeholder="Email"
           {...register("email", {
             required: "Email is required",
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: "Invalid email format",
-            },
+            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" },
           })}
           className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {errors.email && <p className="text-red-500 text-sm mb-3">{errors.email.message}</p>}
 
-        {/* Password */}
         <input
           type="password"
           placeholder="Password"
-          {...register("password", {
-            required: "Password is required",
-            minLength: {
-              value: 6,
-              message: "Password must be at least 6 characters",
-            },
-          })}
+          {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
           className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {errors.password && <p className="text-red-500 text-sm mb-3">{errors.password.message}</p>}
 
+        {/* ✅ Button shows Processing when submitting */}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+          disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors disabled:opacity-60 cursor-pointer"
         >
-          Sign Up
+          {isLoading ? "Processing..." : "Sign Up"}
         </button>
 
         <p className="mt-4 text-center text-gray-600">
           Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-blue-500 font-semibold hover:underline"
-          >
+          <Link to="/login" className="text-blue-500 font-semibold hover:underline">
             Login
           </Link>
         </p>

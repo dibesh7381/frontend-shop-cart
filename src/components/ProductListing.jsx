@@ -151,7 +151,7 @@ function ProductListing({ user }) {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold mb-4 text-center">
-        Welcome, {user.name}! ({user.role})
+        Welcome, {user.name} ({user.role})
         <p className="mt-2">Products</p>
       </h2>
 
@@ -213,7 +213,7 @@ function ProductListing({ user }) {
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
                 onClick={() => handleAddToCart(product)}
-                className={`flex-1 font-semibold py-2 rounded-xl transition-colors ${
+                className={`flex-1 font-semibold py-2 rounded-xl cursor-pointer transition-colors ${
                   user.role === "seller" || product.quantity <= 0
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-green-500 hover:bg-green-600 text-white"
@@ -225,7 +225,7 @@ function ProductListing({ user }) {
               {/* Buy Now */}
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
-                className={`flex-1 font-semibold py-2 rounded-xl transition-colors ${
+                className={`flex-1 font-semibold py-2 rounded-xl cursor-pointer transition-colors ${
                   user.role === "seller" || product.quantity <= 0
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-blue-500 hover:bg-blue-600 text-white"

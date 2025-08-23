@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -19,10 +18,8 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
           const res = await fetch("https://backend-shop-cart.onrender.com/profile", {
             headers: { Authorization: `Bearer ${token}` },
           });
-
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Error fetching profile");
-
           setUser(data.user);
         } catch (err) {
           console.error(err.message);
@@ -44,18 +41,24 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
 
     if (!user) {
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center gap-2 min-h-screen bg-gray-50">
           <div className="max-w-md w-full p-6 bg-white shadow-lg rounded-2xl text-center border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">No User Found</h2>
-            <p className="text-sm text-gray-500">
-              Please <span className="font-medium text-red-600">login</span> to access this page.
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Please Login</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Please login to access this page
             </p>
+            <Link
+              to="/login"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+            >
+              Go to Login
+            </Link>
           </div>
         </div>
       );
     }
 
-    if (requireSeller && user.role !== "seller") {
+    if (requireSeller && user?.role !== "seller") {
       return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
           <div className="bg-white shadow-xl rounded-xl p-10 text-center max-w-md w-full">
@@ -75,6 +78,9 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
       );
     }
 
-    return <WrappedComponent {...props} user={user} />;
+    // Expose setUser to children so Navbar/Profile can update user
+    return <WrappedComponent {...props} user={user} setUser={setUser} />;
   };
 }
+
+

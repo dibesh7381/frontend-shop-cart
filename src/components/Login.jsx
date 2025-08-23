@@ -3,17 +3,16 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 
 export default function Login() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm();
-
+  const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm();
   const navigate = useNavigate();
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // ✅ Loading state
 
   const onSubmit = async (data) => {
+    clearErrors("apiError");
+    setSuccessMessage("");
+    setIsLoading(true); // start loading
+
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/login", {
         method: "POST",
@@ -22,21 +21,21 @@ export default function Login() {
       });
 
       const result = await res.json();
+
       if (!res.ok) {
-        setError("apiError", { message: result.message || "Login failed" });
+        setError("apiError", { message: result.message || "Invalid credentials" });
         return;
       }
 
       localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
-
-      // Show backend success message
       setSuccessMessage(result.message || "Login successful");
 
-      // Redirect after short delay
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
-      setError("apiError", { message: err.message });
+      setError("apiError", { message: err.message || "Something went wrong" });
+    } finally {
+      setIsLoading(false); // stop loading
     }
   };
 
@@ -50,7 +49,6 @@ export default function Login() {
           Login
         </h2>
 
-        {/* Email */}
         <input
           type="email"
           placeholder="Email"
@@ -65,7 +63,6 @@ export default function Login() {
         />
         {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
 
-        {/* Password */}
         <input
           type="password"
           placeholder="Password"
@@ -74,21 +71,16 @@ export default function Login() {
         />
         {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
 
-        {/* API Error */}
-        {errors.apiError && (
-          <p className="text-red-600 text-center font-medium">{errors.apiError.message}</p>
-        )}
+        {errors.apiError && <p className="text-red-600 text-center font-medium">{errors.apiError.message}</p>}
+        {successMessage && <p className="text-green-600 text-center font-medium">{successMessage}</p>}
 
-        {/* Success Message */}
-        {successMessage && (
-          <p className="text-green-600 text-center font-medium">{successMessage}</p>
-        )}
-
+        {/* ✅ Button shows Processing when submitting */}
         <button
           type="submit"
-          className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded transition-colors"
+          disabled={isLoading}
+          className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded transition-colors disabled:opacity-60 cursor-pointer"
         >
-          Login
+          {isLoading ? "Processing..." : "Login"}
         </button>
 
         <p className="mt-4 text-center text-gray-600">
