@@ -3,22 +3,27 @@ import React from "react";
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
+    // 🔹 Initial state: no error at start
     this.state = { hasError: false, errorMessage: "" };
   }
 
+  // 🔹 Runs automatically when child component throws error → updates state
   static getDerivedStateFromError(error) {
     return { hasError: true, errorMessage: error.message };
   }
 
+  // 🔹 Lifecycle hook: logs error details (can send to monitoring services)
   componentDidCatch(error, errorInfo) {
     console.error("Global Error:", error, errorInfo);
   }
 
+  // 🔹 Custom function: reset state + reload the whole page
   handleReload = () => {
     this.setState({ hasError: false, errorMessage: "" });
     window.location.reload();
   };
 
+  // 🔹 UI rendering: show fallback UI if error, else normal children
   render() {
     if (this.state.hasError) {
       return (
@@ -32,7 +37,7 @@ class ErrorBoundary extends React.Component {
             </p>
             <button
               onClick={this.handleReload}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-md transition transform hover:scale-105 w-full sm:w-auto"
+              className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-md transition transform hover:scale-105 w-full sm:w-auto"
             >
               Reload Page
             </button>
@@ -46,4 +51,5 @@ class ErrorBoundary extends React.Component {
 }
 
 export default ErrorBoundary;
+
 

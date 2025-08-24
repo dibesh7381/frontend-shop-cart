@@ -246,14 +246,14 @@ export default function ProductCard({ product, onRefresh }) {
             <div className="flex gap-2 mt-2 flex-wrap">
               <button
                 type="submit"
-                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-green-500 cursor-pointer hover:bg-green-600 text-white py-2 px-4 rounded flex-1"
               >
                 Save
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded flex-1"
+                className="bg-gray-400 cursor-pointer hover:bg-gray-500 text-white py-2 px-4 rounded flex-1"
               >
                 Cancel
               </button>
@@ -275,13 +275,13 @@ export default function ProductCard({ product, onRefresh }) {
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setEditing(true)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-white py-2 px-4 rounded flex-1"
               >
                 Edit
               </button>
               <button
                 onClick={() => setModalOpen(true)}
-                className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-red-500 cursor-pointer hover:bg-red-600 text-white py-2 px-4 rounded flex-1"
               >
                 Delete
               </button>

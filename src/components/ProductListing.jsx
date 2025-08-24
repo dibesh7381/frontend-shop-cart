@@ -101,9 +101,11 @@ import { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import withAuth from "./WithAuth";
+import { useAuth } from "../context/AuthContext";
 
 // eslint-disable-next-line react-refresh/only-export-components
-function ProductListing({ user }) {
+function ProductListing() {
+  const { user } = useAuth(); // ✅ context se user
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -148,6 +150,8 @@ function ProductListing({ user }) {
     }
   };
 
+  if (!user) return null; // ✅ optional: loading or redirect handle
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold mb-4 text-center">
@@ -191,7 +195,6 @@ function ProductListing({ user }) {
               {product.name}
             </h3>
 
-            {/* Seller Name */}
             <p className="text-sm text-gray-500 self-start px-4 mb-2">
               From Seller: {product.sellerId?.name || "Unknown"}
             </p>
@@ -200,16 +203,13 @@ function ProductListing({ user }) {
               ₹{product.price}
             </p>
 
-            <p
-              className={`text-sm font-medium mb-4 self-start px-4 ${
-                product.quantity > 0 ? "text-green-600" : "text-red-600"
-              }`}
-            >
+            <p className={`text-sm font-medium mb-4 self-start px-4 ${
+              product.quantity > 0 ? "text-green-600" : "text-red-600"
+            }`}>
               {product.quantity > 0 ? `In Stock: ${product.quantity}` : "Out of Stock"}
             </p>
 
             <div className="flex gap-3 w-full px-4 mb-4">
-              {/* Add to Cart */}
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
                 onClick={() => handleAddToCart(product)}
@@ -222,7 +222,6 @@ function ProductListing({ user }) {
                 Add to Cart
               </button>
 
-              {/* Buy Now */}
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
                 className={`flex-1 font-semibold py-2 rounded-xl cursor-pointer transition-colors ${

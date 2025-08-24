@@ -1,17 +1,19 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext"; // ✅ Import Auth context
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // ✅ Loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const {  fetchUser } = useAuth(); // ✅ Get setUser & fetchUser
 
   const onSubmit = async (data) => {
     clearErrors("apiError");
     setSuccessMessage("");
-    setIsLoading(true); // start loading
+    setIsLoading(true);
 
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/login", {
@@ -27,15 +29,19 @@ export default function Login() {
         return;
       }
 
+      // ✅ Save token
       localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+
+      // ✅ Update context immediately
+      await fetchUser(); // fetches user from backend and sets context
+
       setSuccessMessage(result.message || "Login successful");
 
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       setError("apiError", { message: err.message || "Something went wrong" });
     } finally {
-      setIsLoading(false); // stop loading
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +80,6 @@ export default function Login() {
         {errors.apiError && <p className="text-red-600 text-center font-medium">{errors.apiError.message}</p>}
         {successMessage && <p className="text-green-600 text-center font-medium">{successMessage}</p>}
 
-        {/* ✅ Button shows Processing when submitting */}
         <button
           type="submit"
           disabled={isLoading}

@@ -1,36 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function withAuth(WrappedComponent, { requireSeller = false } = {}) {
   return function AuthComponent(props) {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { user, loading } = useAuth(); // context se user aur setUser le lo
 
-    useEffect(() => {
-      const fetchProfile = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        try {
-          const res = await fetch("https://backend-shop-cart.onrender.com/profile", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.message || "Error fetching profile");
-          setUser(data.user);
-        } catch (err) {
-          console.error(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchProfile();
-    }, []);
-
+    // Loading state
     if (loading) {
       return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -39,6 +15,7 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
       );
     }
 
+    // User not logged in
     if (!user) {
       return (
         <div className="flex items-center justify-center gap-2 min-h-screen bg-gray-50">
@@ -58,7 +35,8 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
       );
     }
 
-    if (requireSeller && user?.role !== "seller") {
+    // Access denied for non-seller
+    if (requireSeller && user.role !== "seller") {
       return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
           <div className="bg-white shadow-xl rounded-xl p-10 text-center max-w-md w-full">
@@ -78,8 +56,8 @@ export default function withAuth(WrappedComponent, { requireSeller = false } = {
       );
     }
 
-    // Expose setUser to children so Navbar/Profile can update user
-    return <WrappedComponent {...props} user={user} setUser={setUser} />;
+    // Access granted, context se user aur setUser pass ho raha hai
+    return <WrappedComponent {...props}/>;
   };
 }
 

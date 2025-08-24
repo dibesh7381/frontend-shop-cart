@@ -1,8 +1,11 @@
+// 
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useAuth } from "../context/AuthContext";
 
-export default function Navbar({ user, setUser }) {
+export default function Navbar() {
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
@@ -58,7 +61,7 @@ export default function Navbar({ user, setUser }) {
       <img
         src={avatar}
         alt="avatar"
-        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md"
+        className="w-10 h-10 mt-1.5 rounded-full object-cover border-2 border-black shadow-md"
       />
     ) : (
       <span className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg">
@@ -76,15 +79,9 @@ export default function Navbar({ user, setUser }) {
         </Link>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="hover:underline cursor-pointer">
-            Home
-          </Link>
-          <Link to="/seller" className="hover:underline cursor-pointer">
-            Seller
-          </Link>
-          <Link to="/products" className="hover:underline cursor-pointer">
-            Products
-          </Link>
+          <Link to="/" className="hover:underline cursor-pointer">Home</Link>
+          <Link to="/seller" className="hover:underline cursor-pointer">Seller</Link>
+          <Link to="/products" className="hover:underline cursor-pointer">Products</Link>
 
           {user?.role === "customer" && (
             <Link to="/cart" className="relative text-3xl cursor-pointer">
@@ -99,12 +96,8 @@ export default function Navbar({ user, setUser }) {
 
           {!user ? (
             <>
-              <Link to="/signup" className="hover:underline cursor-pointer">
-                Sign Up
-              </Link>
-              <Link to="/login" className="hover:underline cursor-pointer">
-                Login
-              </Link>
+              <Link to="/signup" className="hover:underline cursor-pointer">Sign Up</Link>
+              <Link to="/login" className="hover:underline cursor-pointer">Login</Link>
             </>
           ) : (
             <div ref={desktopRef} className="relative">
@@ -141,7 +134,7 @@ export default function Navbar({ user, setUser }) {
             <Link to="/cart" className="relative text-3xl cursor-pointer">
               🛒
               {badgeCount > 0 && (
-                <span className="absolute -top-2 -right-2 font-extrabold bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {badgeCount}
                 </span>
               )}
@@ -203,60 +196,19 @@ export default function Navbar({ user, setUser }) {
           </button>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
-          <Link
-            to="/"
-            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/seller"
-            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Seller
-          </Link>
-          <Link
-            to="/products"
-            className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Products
-          </Link>
+          <Link to="/" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Home</Link>
+          <Link to="/seller" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Seller</Link>
+          <Link to="/products" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Products</Link>
 
           {!user ? (
             <>
-              <Link
-                to="/signup"
-                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Login
-              </Link>
+              <Link to="/signup" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Sign Up</Link>
+              <Link to="/login" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Login</Link>
             </>
           ) : (
             <>
-              <Link
-                to="/profile"
-                className="px-4 py-3 hover:bg-blue-700 cursor-pointer"
-                onClick={() => setSidebarOpen(false)}
-              >
-                Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer"
-              >
-                Logout
-              </button>
+              <Link to="/profile" className="px-4 py-3 hover:bg-blue-700 cursor-pointer" onClick={() => setSidebarOpen(false)}>Profile</Link>
+              <button onClick={handleLogout} className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer">Logout</button>
             </>
           )}
         </nav>
@@ -264,5 +216,3 @@ export default function Navbar({ user, setUser }) {
     </>
   );
 }
-
-

@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { removeFromCart, decreaseQuantity, increaseQuantity, clearCart } from "../redux/cartSlice";
+import { removeFromCart, decreaseQuantity, increaseQuantity, clearCart} from "../redux/cartSlice";
 
 export default function CartPage() {
   const cartItems = useSelector((state) => state.cart.items);
@@ -9,10 +9,14 @@ export default function CartPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.cartQuantity, 0);
+  const totalPrice = cartItems.reduce(
+    (acc, item) => acc + item.price * item.cartQuantity,
+    0
+  );
 
   const handleIncrease = async (item) => {
-    if (item.quantity - item.cartQuantity <= 0) return alert("Stock limit reached!");
+    if (item.quantity - item.cartQuantity <= 0)
+      return alert("Stock limit reached!");
     try {
       const res = await fetch(
         `https://backend-shop-cart.onrender.com/products/decrease-quantity/${item._id}`,
@@ -56,11 +60,17 @@ export default function CartPage() {
 
   const handleRemoveAll = async () => {
     if (!cartItems.length) return;
-    const items = cartItems.map((item) => ({ id: item._id, quantity: item.cartQuantity }));
+    const items = cartItems.map((item) => ({
+      id: item._id,
+      quantity: item.cartQuantity,
+    }));
     try {
       await fetch("https://backend-shop-cart.onrender.com/products/increase-many", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ items }),
       });
       dispatch(clearCart());
@@ -90,11 +100,15 @@ export default function CartPage() {
         {cartItems.map((item) => (
           <div
             key={item._id}
-            className="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-4 gap-4 items-start"
+            className="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-4 gap-4 items-center"
           >
             {/* Product Image */}
             <div className="w-full md:w-40 h-40 md:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
-              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                className="w-full h-full object-contain"
+              />
             </div>
 
             {/* Product Info */}
@@ -130,7 +144,7 @@ export default function CartPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col md:justify-between gap-2 w-full md:w-auto mt-2 md:mt-0">
+            <div className="flex flex-col md:justify-center md:items-end gap-2 w-full md:w-auto mt-2 md:mt-0">
               <button
                 onClick={() => handleRemove(item)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg cursor-pointer hover:bg-red-600 transition"
@@ -169,3 +183,4 @@ export default function CartPage() {
     </div>
   );
 }
+
