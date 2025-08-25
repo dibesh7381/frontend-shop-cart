@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext"; // ✅ Import Auth context
+import { useAuth } from "../context/AuthContext"; 
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const {  fetchUser } = useAuth(); // ✅ Get setUser & fetchUser
+  const {  fetchUser } = useAuth();
 
   const onSubmit = async (data) => {
     clearErrors("apiError");
@@ -29,11 +29,11 @@ export default function Login() {
         return;
       }
 
-      // ✅ Save token
+
       localStorage.setItem("token", result.token);
 
-      // ✅ Update context immediately
-      await fetchUser(); // fetches user from backend and sets context
+  
+      await fetchUser(); 
 
       setSuccessMessage(result.message || "Login successful");
 

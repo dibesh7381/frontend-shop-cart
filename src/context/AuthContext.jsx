@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Initial fetch on mount
+
   useEffect(() => { fetchUser(); }, []);
 
   return (

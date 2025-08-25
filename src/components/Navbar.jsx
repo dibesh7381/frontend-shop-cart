@@ -13,18 +13,18 @@ export default function Navbar() {
   const desktopRef = useRef();
   const mobileRef = useRef();
 
-  // Cart badge
+
   const badgeCount = useSelector((state) => state.cart.items.length);
 
-  // Navbar avatar
+
   const [avatar, setAvatar] = useState(user?.profilePic || "");
 
-  // Update avatar immediately when user changes
+
   useEffect(() => {
     setAvatar(user?.profilePic || "");
   }, [user]);
 
-  // Close dropdowns on outside click
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (desktopRef.current && !desktopRef.current.contains(e.target)) {
