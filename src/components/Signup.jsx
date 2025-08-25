@@ -5,10 +5,12 @@ import { useState } from "react";
 export default function Signup() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false); // ✅ Loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const onSubmit = async (data) => {
     setIsLoading(true);
+    setServerError("");
 
     try {
       const res = await fetch("https://backend-shop-cart.onrender.com/signup", {
@@ -20,13 +22,13 @@ export default function Signup() {
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.message || "Signup failed");
+        setServerError(result.message || "Something went wrong");
         return;
       }
 
       navigate("/login");
     } catch (err) {
-      alert(err.message);
+      setServerError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +57,10 @@ export default function Signup() {
           placeholder="Email"
           {...register("email", {
             required: "Email is required",
-            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" },
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Invalid email format",
+            },
           })}
           className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -64,12 +69,19 @@ export default function Signup() {
         <input
           type="password"
           placeholder="Password"
-          {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
+          {...register("password", {
+            required: "Password is required",
+            minLength: { value: 6, message: "Password must be at least 6 characters" },
+          })}
           className="mb-1 w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {errors.password && <p className="text-red-500 text-sm mb-3">{errors.password.message}</p>}
 
-        {/* ✅ Button shows Processing when submitting */}
+        {/* ✅ Simple red text for backend error */}
+        {serverError && (
+          <p className="text-red-600 font-semibold text-center">{serverError}</p>
+        )}
+
         <button
           type="submit"
           disabled={isLoading}

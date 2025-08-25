@@ -86,11 +86,18 @@ export default function CartPage() {
   };
 
   if (!cartItems.length)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-        <h2 className="text-2xl font-bold mb-4">Your Cart is Empty</h2>
-      </div>
-    );
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <h2 className="text-2xl font-bold mb-4">Your Cart is Empty</h2>
+      <button
+        onClick={() => navigate("/products")}
+        className="px-6 py-2 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        Start Shopping
+      </button>
+    </div>
+  );
+
 
   return (
     <div className="min-h-screen p-4 md:p-6 bg-gray-100">

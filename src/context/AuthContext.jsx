@@ -1,17 +1,21 @@
 // AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { reloadCart } from "../redux/cartSlice";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setUser(null);
       setLoading(false);
+      dispatch(reloadCart()); // 🟢 guest cart load
       return;
     }
 
@@ -21,21 +25,32 @@ export function AuthProvider({ children }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (data.user) setUser(data.user);
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user)); // 🟢 save logged-in user
+      }
     } catch (err) {
       console.error(err);
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setUser(null);
     } finally {
       setLoading(false);
+      dispatch(reloadCart()); // 🟢 reload cart after user set
     }
   };
 
-
   useEffect(() => { fetchUser(); }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    dispatch(reloadCart()); // 🟢 load guest cart
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, fetchUser }}>
+    <AuthContext.Provider value={{ user, setUser, loading, fetchUser, handleLogout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -45,4 +60,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-
