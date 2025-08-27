@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import withAuth from "./WithAuth";
 import { useAuth } from "../context/AuthContext";
 import { useDispatch } from "react-redux";
-import { addToCartLocal, fetchCart } from "../redux/cartSlice";
+import withAuth from "./WithAuth";
+import {
+  addItemLocal,
+  fetchCartAPI,
+} from "../redux/cartSlice";
 
 const API = "https://backend-shop-cart.onrender.com";
 
@@ -27,7 +30,7 @@ function ProductListing() {
       setCategories(cats);
       setProducts(data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Products Error:", err);
     }
   }, [token]);
 
@@ -35,19 +38,14 @@ function ProductListing() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const filteredProducts = products.filter(p =>
-    selectedCategory === "All" ? true : p.category === selectedCategory
-  );
+  const filteredProducts =
+    selectedCategory === "All"
+      ? products
+      : products.filter((p) => p.category === selectedCategory);
 
-  // ---------------- Add to Cart ----------------
-  const handleAddToCart = async (product) => {
-    if (product.quantity <= 0) return alert("Out of Stock!");
-
-    // 1️⃣ Redux me frontend badge turant update
-    dispatch(addToCartLocal(product));
-
+  // ---------------- Manual API Helper ----------------
+  const addItemAPI = async (product) => {
     try {
-      // 2️⃣ Backend me add
       const res = await fetch(`${API}/cart/add`, {
         method: "POST",
         headers: {
@@ -56,23 +54,35 @@ function ProductListing() {
         },
         body: JSON.stringify({ productId: product._id, quantity: 1 }),
       });
-
       const data = await res.json();
       if (!res.ok) {
         alert(data.message || "Failed to add to cart");
       } else {
-        // 3️⃣ Optional: Backend se fresh cart fetch (badge update ke liye)
-        dispatch(fetchCart());
+        // Backend se fresh cart fetch
+        fetchCartAPI(dispatch);
       }
-
-      // Update local product stock
-      setProducts(prev =>
-        prev.map(p => p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p)
-      );
     } catch (err) {
-      console.error(err);
+      console.error("Add to Cart Error:", err);
       alert("Network error!");
     }
+  };
+
+  // ---------------- Add to Cart Handler ----------------
+  const handleAddToCart = async (product) => {
+    if (product.quantity <= 0) return alert("Out of Stock!");
+
+    // 1️⃣ Redux frontend update
+    dispatch(addItemLocal(product));
+
+    // 2️⃣ Backend update + fetchCart
+    await addItemAPI(product);
+
+    // 3️⃣ Update frontend product stock
+    setProducts((prev) =>
+      prev.map((p) =>
+        p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p
+      )
+    );
   };
 
   if (!user) return null;
@@ -102,7 +112,7 @@ function ProductListing() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredProducts.map(product => (
+        {filteredProducts.map((product) => (
           <div
             key={product._id}
             className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 duration-300 flex flex-col items-center overflow-hidden"
@@ -124,10 +134,14 @@ function ProductListing() {
             <p className="text-lg font-semibold text-gray-800 mb-1 self-start px-4">
               ₹{product.price}
             </p>
-            <p className={`text-sm font-medium mb-4 self-start px-4 ${
-              product.quantity > 0 ? "text-green-600" : "text-red-600"
-            }`}>
-              {product.quantity > 0 ? `In Stock: ${product.quantity}` : "Out of Stock"}
+            <p
+              className={`text-sm font-medium mb-4 self-start px-4 ${
+                product.quantity > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {product.quantity > 0
+                ? `In Stock: ${product.quantity}`
+                : "Out of Stock"}
             </p>
 
             <div className="flex gap-3 w-full px-4 mb-4">

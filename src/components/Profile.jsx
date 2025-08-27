@@ -30,7 +30,7 @@ const Profile = () => {
       const token = localStorage.getItem("token");
       let updatedUser = { ...user };
 
-      // update name
+      // ---------------- Update Name ----------------
       const resName = await fetch("https://backend-shop-cart.onrender.com/profile", {
         method: "PUT",
         headers: {
@@ -39,25 +39,28 @@ const Profile = () => {
         },
         body: JSON.stringify({ name }),
       });
-      if (!resName.ok) throw new Error("Error updating name");
       const dataName = await resName.json();
-      updatedUser = dataName.user;
+      if (!resName.ok) throw new Error(dataName.message || "Error updating name");
+      updatedUser.name = dataName.user?.name || updatedUser.name;
 
-      // update pic
+      // ---------------- Update Profile Picture ----------------
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
         const resPic = await fetch("https://backend-shop-cart.onrender.com/profile/pic", {
           method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ do not set Content-Type manually
+          },
           body: formData,
         });
-        if (!resPic.ok) throw new Error("Error updating profile picture");
         const dataPic = await resPic.json();
-        updatedUser = dataPic.user;
+        if (!resPic.ok) throw new Error(dataPic.message || "Error updating profile picture");
+        updatedUser.profilePic = dataPic.user?.profilePic || updatedUser.profilePic;
       }
 
+      // ---------------- Update Context & LocalStorage ----------------
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setProfileImage(updatedUser.profilePic);
@@ -68,9 +71,9 @@ const Profile = () => {
     } catch (err) {
       console.error(err);
       alert(err.message || "Something went wrong while saving.");
+    } finally {
+      setIsSaving(false);
     }
-
-    setIsSaving(false);
   };
 
   const handleLogout = () => {
@@ -79,6 +82,8 @@ const Profile = () => {
     setUser(null);
     navigate("/login");
   };
+
+  const defaultAvatar = "https://source.unsplash.com/100x100/?avatar";
 
   return (
     <div className="w-[90%] sm:w-4/5 max-w-lg mx-auto mt-10 p-6 sm:p-8 bg-white rounded-2xl shadow-2xl border border-gray-100 transition-all hover:shadow-xl">
@@ -104,7 +109,7 @@ const Profile = () => {
       {/* Avatar */}
       <div className="flex flex-col items-center mb-8 relative">
         <img
-          src={profileImage || "https://source.unsplash.com/100x100/?avatar"}
+          src={profileImage || defaultAvatar}
           alt="Profile"
           className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-md"
         />
@@ -184,8 +189,6 @@ const Profile = () => {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default withAuth(Profile);
-
-
 
 
 

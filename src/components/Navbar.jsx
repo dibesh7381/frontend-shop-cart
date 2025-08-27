@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchCart } from "../redux/cartSlice";
+import { fetchCartAPI } from "../redux/cartSlice";
 
 export default function Navbar() {
   const { user, setUser } = useAuth();
@@ -24,11 +24,11 @@ const badgeCount = useSelector((state) => state.cart.uniqueCount);
 
 
   // ✅ Navbar load hone par cart fetch karo
-  useEffect(() => {
-    if (user?.role === "customer") {
-      dispatch(fetchCart());
-    }
-  }, [user, dispatch]);
+useEffect(() => {
+  if (user?.role === "customer") {
+    fetchCartAPI(dispatch); // ✅ manual helper, dispatch pass kar ke call
+  }
+}, [user, dispatch]);
 
   // Click outside handler
   useEffect(() => {
@@ -109,13 +109,13 @@ const badgeCount = useSelector((state) => state.cart.uniqueCount);
             </>
           ) : (
             <div ref={desktopRef} className="relative">
-              <button onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}>
+              <button className="cursor-pointer" onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}>
                 {renderAvatar()}
               </button>
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setDesktopProfileOpen(false)}>Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
+                  <button onClick={handleLogout} className="w-full text-left cursor-pointer px-4 py-2 text-white hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
