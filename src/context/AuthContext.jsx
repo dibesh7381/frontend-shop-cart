@@ -1,7 +1,7 @@
 // AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { reloadCart } from "../redux/cartSlice";
+import { fetchCart } from "../redux/cartSlice";
 
 const AuthContext = createContext();
 
@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
     if (!token) {
       setUser(null);
       setLoading(false);
-      dispatch(reloadCart()); // 🟢 guest cart load
+      dispatch(fetchCart()); // 🟢 guest cart load
       return;
     }
 
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       setUser(null);
     } finally {
       setLoading(false);
-      dispatch(reloadCart()); // 🟢 reload cart after user set
+      dispatch(fetchCart()); // 🟢 reload cart after user set
     }
   };
 
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    dispatch(reloadCart()); // 🟢 load guest cart
+    dispatch(fetchCart()); // 🟢 load guest cart
   };
 
   return (

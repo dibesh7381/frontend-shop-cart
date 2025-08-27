@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { useAuth } from "../context/AuthContext";
-
+import { useSelector, useDispatch } from "react-redux";
+import { fetchCart } from "../redux/cartSlice";
 
 export default function Navbar() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
@@ -14,14 +15,22 @@ export default function Navbar() {
   const desktopRef = useRef();
   const mobileRef = useRef();
 
-  const badgeCount = useSelector((state) => state.cart.items.length);
-
   const [avatar, setAvatar] = useState(user?.profilePic || "");
+  useEffect(() => setAvatar(user?.profilePic || ""), [user]);
 
+  // ✅ Redux se uniqueCount le lo
+// Redux se unique products count lo
+const badgeCount = useSelector((state) => state.cart.uniqueCount);
+
+
+  // ✅ Navbar load hone par cart fetch karo
   useEffect(() => {
-    setAvatar(user?.profilePic || "");
-  }, [user]);
+    if (user?.role === "customer") {
+      dispatch(fetchCart());
+    }
+  }, [user, dispatch]);
 
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (desktopRef.current && !desktopRef.current.contains(e.target)) {
@@ -66,7 +75,6 @@ export default function Navbar() {
       </span>
     );
 
-  // 🔹 Custom nav link style with animated underline
   const navLink =
     "relative cursor-pointer after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-white after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full";
 
@@ -74,22 +82,14 @@ export default function Navbar() {
     <>
       <nav className="p-4 bg-blue-900 text-white flex justify-between items-center shadow-md relative">
         <Link to="/">
-          <span className="font-extrabold text-xl cursor-pointer">
-            ShopCart
-          </span>
+          <span className="font-extrabold text-xl cursor-pointer">ShopCart</span>
         </Link>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className={navLink}>
-            Home
-          </Link>
-          <Link to="/seller" className={navLink}>
-            Seller
-          </Link>
-          <Link to="/products" className={navLink}>
-            Products
-          </Link>
+          <Link to="/" className={navLink}>Home</Link>
+          <Link to="/seller" className={navLink}>Seller</Link>
+          <Link to="/products" className={navLink}>Products</Link>
 
           {user?.role === "customer" && (
             <Link to="/cart" className="relative text-3xl cursor-pointer">
@@ -104,36 +104,18 @@ export default function Navbar() {
 
           {!user ? (
             <>
-              <Link to="/signup" className={navLink}>
-                Sign Up
-              </Link>
-              <Link to="/login" className={navLink}>
-                Login
-              </Link>
+              <Link to="/signup" className={navLink}>Sign Up</Link>
+              <Link to="/login" className={navLink}>Login</Link>
             </>
           ) : (
             <div ref={desktopRef} className="relative">
-              <button
-                onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
-                className="ml-3 cursor-pointer"
-              >
+              <button onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}>
                 {renderAvatar()}
               </button>
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
-                    onClick={() => setDesktopProfileOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
-                  >
-                    Logout
-                  </button>
+                  <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setDesktopProfileOpen(false)}>Profile</Link>
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
@@ -155,36 +137,19 @@ export default function Navbar() {
 
           {user && (
             <div ref={mobileRef} className="relative">
-              <button
-                onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
-                className="cursor-pointer"
-              >
+              <button onClick={() => setMobileProfileOpen(!mobileProfileOpen)}>
                 {renderAvatar()}
               </button>
               {mobileProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
-                    onClick={() => setMobileProfileOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
-                  >
-                    Logout
-                  </button>
+                  <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setMobileProfileOpen(false)}>Profile</Link>
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
           )}
 
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex flex-col justify-between w-6 h-5 focus:outline-none cursor-pointer"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="flex flex-col justify-between w-6 h-5 focus:outline-none cursor-pointer">
             <span className="block h-0.5 w-full bg-white"></span>
             <span className="block h-0.5 w-full bg-white"></span>
             <span className="block h-0.5 w-full bg-white"></span>
@@ -193,75 +158,25 @@ export default function Navbar() {
       </nav>
 
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 right-0 h-full w-64 bg-blue-800 text-white transform transition-transform duration-300 z-50 shadow-lg ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
+      <div className={`fixed top-0 right-0 h-full w-64 bg-blue-800 text-white transform transition-transform duration-300 z-50 shadow-lg ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex justify-between items-center p-4 border-b border-blue-700">
           <span className="font-bold text-lg">Menu</span>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="text-white text-2xl font-bold cursor-pointer"
-          >
-            &times;
-          </button>
+          <button onClick={() => setSidebarOpen(false)} className="text-white text-2xl font-bold">&times;</button>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
-          <Link
-            to="/"
-            className={`${navLink} px-4 py-3`}
-            onClick={() => setSidebarOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/seller"
-            className={`${navLink} px-4 py-3`}
-            onClick={() => setSidebarOpen(false)}
-          >
-            Seller
-          </Link>
-          <Link
-            to="/products"
-            className={`${navLink} px-4 py-3`}
-            onClick={() => setSidebarOpen(false)}
-          >
-            Products
-          </Link>
+          <Link to="/" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Home</Link>
+          <Link to="/seller" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Seller</Link>
+          <Link to="/products" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Products</Link>
 
           {!user ? (
             <>
-              <Link
-                to="/signup"
-                className={`${navLink} px-4 py-3`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                className={`${navLink} px-4 py-3`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                Login
-              </Link>
+              <Link to="/signup" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Sign Up</Link>
+              <Link to="/login" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Login</Link>
             </>
           ) : (
             <>
-              <Link
-                to="/profile"
-                className={`${navLink} px-4 py-3`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer"
-              >
-                Logout
-              </button>
+              <Link to="/profile" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Profile</Link>
+              <button onClick={handleLogout} className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer">Logout</button>
             </>
           )}
         </nav>
@@ -269,3 +184,4 @@ export default function Navbar() {
     </>
   );
 }
+

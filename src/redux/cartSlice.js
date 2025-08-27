@@ -1,68 +1,120 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const getUserId = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user ? user._id : "guest"; // 🟢 guest ke liye separate cart
-};
+const API = "https://backend-shop-cart.onrender.com";
 
-const loadCart = () => {
-  const userId = getUserId();
-  return JSON.parse(localStorage.getItem(`cartItems_${userId}`)) || [];
-};
+// ---------------- Fetch Cart ----------------
+export const fetchCart = createAsyncThunk("cart/fetchCart", async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API}/cart`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  const items = (data.items || []).map(item => ({
+    quantity: item.quantity,
+    product: item.productId
+  }));
+  return items;
+});
 
-const saveCart = (items) => {
-  const userId = getUserId();
-  localStorage.setItem(`cartItems_${userId}`, JSON.stringify(items));
-};
+// ---------------- Increase Quantity ----------------
+export const increaseItem = createAsyncThunk("cart/increaseItem", async (productId) => {
+  const token = localStorage.getItem("token");
+  await fetch(`${API}/cart/increase`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ productId }),
+  });
+  return productId;
+});
 
-const initialState = {
-  items: loadCart(),
-};
+// ---------------- Decrease Quantity ----------------
+export const decreaseItem = createAsyncThunk("cart/decreaseItem", async (productId) => {
+  const token = localStorage.getItem("token");
+  await fetch(`${API}/cart/decrease`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ productId }),
+  });
+  return productId;
+});
 
+// ---------------- Remove Item ----------------
+export const removeItem = createAsyncThunk("cart/removeItem", async (productId) => {
+  const token = localStorage.getItem("token");
+  await fetch(`${API}/cart/remove`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ productId }),
+  });
+  return productId;
+});
+
+// ---------------- Clear Cart ----------------
+export const clearCart = createAsyncThunk("cart/clearCart", async () => {
+  const token = localStorage.getItem("token");
+  await fetch(`${API}/cart/clear`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  });
+  return true;
+});
+
+// ---------------- Cart Slice ----------------
 const cartSlice = createSlice({
   name: "cart",
-  initialState,
+  initialState: {
+    items: [],
+    loading: false,
+    error: null,
+    uniqueCount: 0,
+  },
   reducers: {
-    addToCart: (state, action) => {
-      const item = action.payload;
-      const existing = state.items.find((i) => i._id === item._id);
-      if (existing) {
-        existing.cartQuantity += 1;
-      } else {
-        state.items.push({ ...item, cartQuantity: 1 });
+    // ✅ Local add for live badge
+    addToCartLocal: (state, action) => {
+      const product = action.payload;
+      const existing = state.items.find(i => i.product?._id === product._id);
+      if (!existing) {
+        state.items.push({ product, quantity: 1 });
+        state.uniqueCount = state.items.length;
       }
-      saveCart(state.items);
     },
-    increaseQuantity: (state, action) => {
-      const id = action.payload;
-      const existing = state.items.find((i) => i._id === id);
-      if (existing) existing.cartQuantity += 1;
-      saveCart(state.items);
-    },
-    decreaseQuantity: (state, action) => {
-      const id = action.payload;
-      const existing = state.items.find((i) => i._id === id);
-      if (existing) {
-        existing.cartQuantity -= 1;
-        if (existing.cartQuantity <= 0) {
-          state.items = state.items.filter((i) => i._id !== id);
-        }
-      }
-      saveCart(state.items);
-    },
-    removeFromCart: (state, action) => {
-      state.items = state.items.filter((i) => i._id !== action.payload);
-      saveCart(state.items);
-    },
-    clearCart: (state) => {
-      state.items = [];
-      saveCart(state.items);
-    },
-    reloadCart: (state) => {
-      state.items = loadCart(); // 🟢 reload current user/guest cart
-    },
+  },
+  extraReducers: (builder) => {
+    const updateUniqueCount = (state) => {
+      state.uniqueCount = state.items.length;
+    };
+
+    builder
+      .addCase(fetchCart.pending, (state) => { state.loading = true; })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        updateUniqueCount(state);
+      })
+      .addCase(fetchCart.rejected, (state) => { state.loading = false; })
+
+      .addCase(increaseItem.fulfilled, (state, action) => {
+        const item = state.items.find(i => i.product?._id === action.payload);
+        if (item) item.quantity += 1;
+      })
+      .addCase(decreaseItem.fulfilled, (state, action) => {
+        const item = state.items.find(i => i.product?._id === action.payload);
+        if (item && item.quantity > 1) item.quantity -= 1;
+        else state.items = state.items.filter(i => i.product?._id !== action.payload);
+        updateUniqueCount(state);
+      })
+      .addCase(removeItem.fulfilled, (state, action) => {
+        state.items = state.items.filter(i => i.product?._id !== action.payload);
+        updateUniqueCount(state);
+      })
+      .addCase(clearCart.fulfilled, (state) => { 
+        state.items = []; 
+        updateUniqueCount(state);
+      });
   },
 });
 
-export const { addToCart, increaseQuantity, decreaseQuantity, removeFromCart, clearCart, reloadCart } = cartSlice.actions;
+export const { addToCartLocal } = cartSlice.actions; // ✅ export reducer
 export default cartSlice.reducer;
+
+

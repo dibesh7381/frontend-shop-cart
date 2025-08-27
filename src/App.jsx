@@ -24,7 +24,7 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <ErrorBoundary>
+            <ErrorBoundary>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -42,7 +42,7 @@ const App = () => {
           <Route path="/address" element={<AddressPage />} />
         </Routes>
       </ErrorBoundary>
-    </AuthProvider>
+          </AuthProvider>
   );
 };
 

@@ -1,22 +1,25 @@
-
 import { useEffect, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { addToCart } from "../redux/cartSlice";
 import withAuth from "./WithAuth";
 import { useAuth } from "../context/AuthContext";
+import { useDispatch } from "react-redux";
+import { addToCartLocal, fetchCart } from "../redux/cartSlice";
+
+const API = "https://backend-shop-cart.onrender.com";
 
 // eslint-disable-next-line react-refresh/only-export-components
 function ProductListing() {
-  const { user } = useAuth(); // ✅ context se user
+  const { user } = useAuth();
+  const dispatch = useDispatch();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const token = localStorage.getItem("token");
-  const dispatch = useDispatch();
 
+  const token = localStorage.getItem("token");
+
+  // ---------------- Fetch Products ----------------
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch("https://backend-shop-cart.onrender.com/products/listing", {
+      const res = await fetch(`${API}/products/listing`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -28,27 +31,47 @@ function ProductListing() {
     }
   }, [token]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filteredProducts = products.filter(p =>
     selectedCategory === "All" ? true : p.category === selectedCategory
   );
 
+  // ---------------- Add to Cart ----------------
   const handleAddToCart = async (product) => {
     if (product.quantity <= 0) return alert("Out of Stock!");
+
+    // 1️⃣ Redux me frontend badge turant update
+    dispatch(addToCartLocal(product));
+
     try {
-      const res = await fetch(`https://backend-shop-cart.onrender.com/products/decrease-quantity/${product._id}`, {
+      // 2️⃣ Backend me add
+      const res = await fetch(`${API}/cart/add`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: product._id, quantity: 1 }),
       });
-      if (res.ok) {
-        dispatch(addToCart(product));
-        setProducts(prev => prev.map(p =>
-          p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p
-        ));
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Failed to add to cart");
+      } else {
+        // 3️⃣ Optional: Backend se fresh cart fetch (badge update ke liye)
+        dispatch(fetchCart());
       }
+
+      // Update local product stock
+      setProducts(prev =>
+        prev.map(p => p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p)
+      );
     } catch (err) {
       console.error(err);
+      alert("Network error!");
     }
   };
 
@@ -58,7 +81,6 @@ function ProductListing() {
     <div className="min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold mb-4 text-center">
         Welcome, {user.name} ({user.role})
-        <p className="mt-2">Products</p>
       </h2>
 
       {/* Category Filter */}
@@ -96,15 +118,12 @@ function ProductListing() {
             <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-1 self-start px-4">
               {product.name}
             </h3>
-
             <p className="text-sm text-gray-500 self-start px-4 mb-2">
               From Seller: {product.sellerId?.name || "Unknown"}
             </p>
-
             <p className="text-lg font-semibold text-gray-800 mb-1 self-start px-4">
               ₹{product.price}
             </p>
-
             <p className={`text-sm font-medium mb-4 self-start px-4 ${
               product.quantity > 0 ? "text-green-600" : "text-red-600"
             }`}>
@@ -115,10 +134,10 @@ function ProductListing() {
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
                 onClick={() => handleAddToCart(product)}
-                className={`flex-1 font-semibold py-2 rounded-xl cursor-pointer transition-colors ${
+                className={`flex-1 font-semibold py-3 rounded-xl cursor-pointer transition-colors text-white ${
                   user.role === "seller" || product.quantity <= 0
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-green-500 hover:bg-green-600 text-white"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
                 }`}
               >
                 Add to Cart
@@ -126,10 +145,10 @@ function ProductListing() {
 
               <button
                 disabled={user.role === "seller" || product.quantity <= 0}
-                className={`flex-1 font-semibold py-2 rounded-xl cursor-pointer transition-colors ${
+                className={`flex-1 font-semibold py-3 rounded-xl cursor-pointer transition-colors text-white ${
                   user.role === "seller" || product.quantity <= 0
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
                 }`}
               >
                 Buy Now
@@ -144,5 +163,3 @@ function ProductListing() {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default withAuth(ProductListing);
-
-
