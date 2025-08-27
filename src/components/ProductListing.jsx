@@ -2,10 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useDispatch } from "react-redux";
 import withAuth from "./WithAuth";
-import {
-  addItemLocal,
-  fetchCartAPI,
-} from "../redux/cartSlice";
+import {addItemLocal,fetchCartAPI} from "../redux/cartSlice";
 
 const API = "https://backend-shop-cart.onrender.com";
 

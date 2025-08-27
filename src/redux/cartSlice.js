@@ -45,15 +45,7 @@ const cartSlice = createSlice({
   },
 });
 
-export const {
-  setCart,
-  addItemLocal,
-  increaseItemLocal,
-  decreaseItemLocal,
-  removeItemLocal,
-  clearCartLocal,
-  setLoading,
-} = cartSlice.actions;
+export const {  setCart, addItemLocal, increaseItemLocal, decreaseItemLocal, removeItemLocal, clearCartLocal, setLoading,} = cartSlice.actions;
 export default cartSlice.reducer;
 
 // -------------------- Manual API Helpers --------------------
