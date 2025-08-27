@@ -77,36 +77,15 @@ export default function ProductCard({ product, onRefresh }) {
   };
 
   const categories = [
-    "Soap",
-    "Dress",
-    "Electronics",
-    "Food",
-    "Books",
-    "Shoes",
-    "Cosmetics",
-    "Toys",
-    "Mobiles",
-    "Laptops",
-    "Watches",
-    "Bags",
-    "Home Decor",
-    "Furniture",
-    "Kitchen Appliances",
-    "Sports",
-    "Stationery",
-    "Jewelry",
-    "Hair Care",
-    "Skincare",
-    "Gaming",
-    "Pet Supplies",
-    "Music",
-    "Automotive",
-    "Baby Products",
-    "Health & Wellness",
+    "Soap","Dress","Electronics","Food","Books","Shoes","Cosmetics","Toys",
+    "Mobiles","Laptops","Watches","Bags","Home Decor","Furniture","Kitchen Appliances",
+    "Sports","Stationery","Jewelry","Hair Care","Skincare","Gaming","Pet Supplies",
+    "Music","Automotive","Baby Products","Health & Wellness",
   ];
 
   return (
-    <div className="bg-white shadow rounded overflow-hidden flex flex-col w-full md:w-auto">
+    <div className="bg-white shadow rounded overflow-hidden flex flex-col w-full md:w-auto
+                    transform transition-transform duration-300 hover:scale-105">
       {/* Image */}
       <div className="w-full h-64 flex items-center justify-center bg-gray-100 overflow-hidden">
         <img
@@ -119,7 +98,7 @@ export default function ProductCard({ product, onRefresh }) {
       <div className="p-4 flex flex-col flex-1">
         {editing ? (
           <form className="space-y-2 w-full" onSubmit={handleSubmit(onSubmit)}>
-            {/* Name */}
+            {/* Form inputs remain same */}
             <div className="flex flex-col">
               <input
                 {...register("name", { required: "Product name is required" })}
@@ -127,29 +106,19 @@ export default function ProductCard({ product, onRefresh }) {
                 placeholder="Product Name"
               />
               {errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
               )}
             </div>
-
-            {/* Details */}
             <div className="flex flex-col">
               <textarea
-                {...register("details", {
-                  required: "Product details are required",
-                })}
+                {...register("details", { required: "Product details are required" })}
                 className="w-full p-2 border rounded"
                 placeholder="Product Details"
               />
               {errors.details && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.details.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.details.message}</p>
               )}
             </div>
-
-            {/* Category */}
             <div className="flex flex-col">
               <label className="mb-1 font-medium">Category</label>
               <select
@@ -157,22 +126,15 @@ export default function ProductCard({ product, onRefresh }) {
                 className="w-full p-2 border rounded"
                 defaultValue=""
               >
-                <option value="" disabled>
-                  Select Category
-                </option>
+                <option value="" disabled>Select Category</option>
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
               {errors.category && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.category.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
               )}
             </div>
-            {/* Quantity */}
             <div className="flex flex-col">
               <input
                 type="number"
@@ -185,13 +147,9 @@ export default function ProductCard({ product, onRefresh }) {
                 placeholder="Quantity"
               />
               {errors.quantity && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.quantity.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.quantity.message}</p>
               )}
             </div>
-
-            {/* Price */}
             <div className="flex flex-col">
               <input
                 type="number"
@@ -205,13 +163,9 @@ export default function ProductCard({ product, onRefresh }) {
                 placeholder="Price in ₹"
               />
               {errors.price && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.price.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
               )}
             </div>
-
-            {/* File */}
             <div className="flex flex-col">
               <input
                 type="file"
@@ -220,25 +174,16 @@ export default function ProductCard({ product, onRefresh }) {
                   validate: (fileList) => {
                     if (!fileList?.[0]) return true;
                     const file = fileList[0];
-                    if (
-                      !["image/jpeg", "image/png", "image/jpg"].includes(
-                        file.type
-                      )
-                    ) {
+                    if (!["image/jpeg","image/png","image/jpg"].includes(file.type))
                       return "Only JPG or PNG images allowed";
-                    }
-                    if (file.size > 2 * 1024 * 1024) {
-                      return "Image size must be <= 2MB";
-                    }
+                    if (file.size > 2*1024*1024) return "Image size must be <= 2MB";
                     return true;
                   },
                 })}
                 className="w-full p-2 border rounded"
               />
               {errors.file && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.file.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.file.message}</p>
               )}
             </div>
 
@@ -246,14 +191,14 @@ export default function ProductCard({ product, onRefresh }) {
             <div className="flex gap-2 mt-2 flex-wrap">
               <button
                 type="submit"
-                className="bg-green-500 cursor-pointer hover:bg-green-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-green-500 cursor-pointer text-white py-2 px-4 rounded flex-1"
               >
                 Save
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="bg-gray-400 cursor-pointer hover:bg-gray-500 text-white py-2 px-4 rounded flex-1"
+                className="bg-gray-400 text-white  cursor-pointer py-2 px-4 rounded flex-1"
               >
                 Cancel
               </button>
@@ -263,25 +208,19 @@ export default function ProductCard({ product, onRefresh }) {
           <>
             <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
             <p className="text-gray-600 text-sm mb-1">{product.details}</p>
-            <p className="text-gray-600 text-sm mb-1">
-              Category: {product.category}
-            </p>
-            <p className="text-gray-800 font-medium mb-1">
-              Quantity: {product.quantity}
-            </p>
-            <p className="text-gray-800 font-medium mb-2">
-              Price: ₹{Number(product.price).toLocaleString("en-IN")}
-            </p>
+            <p className="text-gray-600 text-sm mb-1">Category: {product.category}</p>
+            <p className="text-gray-800 font-medium mb-1">Quantity: {product.quantity}</p>
+            <p className="text-gray-800 font-medium mb-2">Price: ₹{Number(product.price).toLocaleString("en-IN")}</p>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setEditing(true)}
-                className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-yellow-500 text-white py-2 px-4 rounded flex-1 cursor-pointer hover:bg-yellow-600"
               >
                 Edit
               </button>
               <button
                 onClick={() => setModalOpen(true)}
-                className="bg-red-500 cursor-pointer hover:bg-red-600 text-white py-2 px-4 rounded flex-1"
+                className="bg-red-500 text-white py-2 px-4 rounded flex-1 cursor-pointer hover:bg-red-600"
               >
                 Delete
               </button>
