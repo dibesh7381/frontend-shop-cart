@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useDispatch } from "react-redux";
 import withAuth from "./WithAuth";
-import {addItemLocal,fetchCartAPI} from "../redux/cartSlice";
+import { addItemLocal, fetchCartAPI } from "../redux/cartSlice";
 
 const API = "https://backend-shop-cart.onrender.com";
 
@@ -13,6 +13,9 @@ function ProductListing() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const [message, setMessage] = useState(null); // ✅ new state for message
+  const [messageType, setMessageType] = useState("success"); // ✅ success/error
 
   const token = localStorage.getItem("token");
 
@@ -53,28 +56,31 @@ function ProductListing() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.message || "Failed to add to cart");
+        showMessage(data.message || "Failed to add to cart", "error");
       } else {
-        // Backend se fresh cart fetch
         fetchCartAPI(dispatch);
+        showMessage("✅ Added to cart!", "success");
       }
     } catch (err) {
       console.error("Add to Cart Error:", err);
-      alert("Network error!");
+      showMessage("⚠️ Network error!", "error");
     }
+  };
+
+  // ---------------- Show Message Helper ----------------
+  const showMessage = (msg, type) => {
+    setMessage(msg);
+    setMessageType(type);
+    setTimeout(() => setMessage(null), 3000); // 3 sec baad gayab
   };
 
   // ---------------- Add to Cart Handler ----------------
   const handleAddToCart = async (product) => {
-    if (product.quantity <= 0) return alert("Out of Stock!");
+    if (product.quantity <= 0) return showMessage("Out of Stock!", "error");
 
-    // 1️⃣ Redux frontend update
     dispatch(addItemLocal(product));
-
-    // 2️⃣ Backend update + fetchCart
     await addItemAPI(product);
 
-    // 3️⃣ Update frontend product stock
     setProducts((prev) =>
       prev.map((p) =>
         p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p
@@ -85,10 +91,21 @@ function ProductListing() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4 relative">
       <h2 className="text-3xl font-bold mb-4 text-center">
         Welcome, {user.name} ({user.role})
       </h2>
+
+      {/* ✅ Message Box */}
+      {message && (
+        <div
+          className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg text-white font-medium transition ${
+            messageType === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {message}
+        </div>
+      )}
 
       {/* Category Filter */}
       <div className="flex flex-wrap justify-center gap-2 mb-6 items-center">
@@ -174,3 +191,4 @@ function ProductListing() {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default withAuth(ProductListing);
+

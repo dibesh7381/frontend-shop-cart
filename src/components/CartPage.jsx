@@ -9,7 +9,9 @@ export default function CartPage() {
   const { user } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items: cartItems, loading } = useSelector((state) => state.cart);
+  const cart = useSelector((state) => state.cart);
+  const cartItems = cart.items;
+  const loading = cart.loading;
 
   // ---------------- Fetch Cart on mount ----------------
   useEffect(() => {
