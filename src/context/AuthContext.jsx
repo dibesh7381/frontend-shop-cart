@@ -77,7 +77,7 @@ export function AuthProvider({ children }) {
     if (!token) {
       setUser(null);
       setLoading(false);
-      fetchCartAPI(dispatch); // 🟢 guest cart load
+      fetchCartAPI(dispatch);
       return;
     }
 

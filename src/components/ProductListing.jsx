@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useDispatch } from "react-redux";
 import withAuth from "./WithAuth";
-import { addItemLocal, fetchCartAPI } from "../redux/cartSlice";
+import { addItemLocal, addItemAPI, fetchCartAPI } from "../redux/cartSlice";
 
 const API = "https://backend-shop-cart.onrender.com";
 
@@ -14,8 +14,8 @@ function ProductListing() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const [message, setMessage] = useState(null); // ✅ new state for message
-  const [messageType, setMessageType] = useState("success"); // ✅ success/error
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState("success");
 
   const token = localStorage.getItem("token");
 
@@ -43,30 +43,6 @@ function ProductListing() {
       ? products
       : products.filter((p) => p.category === selectedCategory);
 
-  // ---------------- Manual API Helper ----------------
-  const addItemAPI = async (product) => {
-    try {
-      const res = await fetch(`${API}/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId: product._id, quantity: 1 }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showMessage(data.message || "Failed to add to cart", "error");
-      } else {
-        fetchCartAPI(dispatch);
-        showMessage("✅ Added to cart!", "success");
-      }
-    } catch (err) {
-      console.error("Add to Cart Error:", err);
-      showMessage("⚠️ Network error!", "error");
-    }
-  };
-
   // ---------------- Show Message Helper ----------------
   const showMessage = (msg, type) => {
     setMessage(msg);
@@ -78,9 +54,17 @@ function ProductListing() {
   const handleAddToCart = async (product) => {
     if (product.quantity <= 0) return showMessage("Out of Stock!", "error");
 
+    // Frontend optimistic update
     dispatch(addItemLocal(product));
-    await addItemAPI(product);
+    showMessage("✅ Added to cart!", "success");
 
+    // Backend update via slice helper
+    await addItemAPI(dispatch, product);
+
+    // Sync Redux store with backend
+    await fetchCartAPI(dispatch);
+
+    // Update local products quantity
     setProducts((prev) =>
       prev.map((p) =>
         p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p
@@ -191,4 +175,3 @@ function ProductListing() {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default withAuth(ProductListing);
-
