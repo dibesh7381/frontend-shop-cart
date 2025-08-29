@@ -66,7 +66,7 @@ export default function Navbar() {
       <img
         src={avatar}
         alt="avatar"
-        className="w-10 h-10 mt-1.5 rounded-full object-cover border-2 border-white shadow-md"
+        className="w-10 h-10 mt-1.5 rounded-full object-cover border-2 border-white cursor-pointer shadow-md"
       />
     ) : (
       <span className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-lg">
