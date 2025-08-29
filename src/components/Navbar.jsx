@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,17 +19,15 @@ export default function Navbar() {
   const [avatar, setAvatar] = useState(user?.profilePic || "");
   useEffect(() => setAvatar(user?.profilePic || ""), [user]);
 
-  // ✅ Redux se uniqueCount le lo
-// Redux se unique products count lo
-const badgeCount = useSelector((state) => state.cart.uniqueCount);
-
+  // ✅ Redux se cart count
+  const badgeCount = useSelector((state) => state.cart.uniqueCount);
 
   // ✅ Navbar load hone par cart fetch karo
-useEffect(() => {
-  if (user?.role === "customer") {
-    fetchCartAPI(dispatch); // ✅ manual helper, dispatch pass kar ke call
-  }
-}, [user, dispatch]);
+  useEffect(() => {
+    if (user?.role === "customer") {
+      fetchCartAPI(dispatch);
+    }
+  }, [user, dispatch]);
 
   // Click outside handler
   useEffect(() => {
@@ -109,13 +108,13 @@ useEffect(() => {
             </>
           ) : (
             <div ref={desktopRef} className="relative">
-              <button className="cursor-pointer" onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}>
+              <button onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}>
                 {renderAvatar()}
               </button>
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setDesktopProfileOpen(false)}>Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left cursor-pointer px-4 py-2 text-white hover:bg-blue-700">Logout</button>
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
@@ -184,4 +183,3 @@ useEffect(() => {
     </>
   );
 }
-

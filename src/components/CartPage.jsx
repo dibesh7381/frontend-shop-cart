@@ -3,15 +3,15 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { fetchCartAPI, increaseItemAPI, decreaseItemAPI, removeItemAPI, clearCartAPI} from "../redux/cartSlice";
+import { fetchCartAPI, increaseItemAPI, decreaseItemAPI, removeItemAPI, clearCartAPI } from "../redux/cartSlice";
 
 export default function CartPage() {
   const { user } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const cart = useSelector((state) => state.cart);
-  const cartItems = cart.items;
-  const loading = cart.loading;
+  const cartItems = useSelector(state => state.cart.items);
+  const loading = useSelector(state => state.cart.loading);
+
 
   // ---------------- Fetch Cart on mount ----------------
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function CartPage() {
           const product = item.product || {};
           return (
             <div
-              key={product._id || Math.random()}
+              key={product._id}
               className="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg p-4 gap-4 md:items-center"
             >
               {/* Product Image */}
@@ -88,7 +88,6 @@ export default function CartPage() {
                       product._id && decreaseItemAPI(dispatch, product._id)
                     }
                     className="px-4 py-2 bg-yellow-400 cursor-pointer rounded-lg hover:bg-yellow-500 text-lg md:text-base font-semibold"
-                    disabled={!product._id}
                   >
                     -
                   </button>
@@ -99,12 +98,7 @@ export default function CartPage() {
                     onClick={() =>
                       product._id && increaseItemAPI(dispatch, product._id)
                     }
-                    disabled={!product._id || item.quantity >= (product.quantity || 999)}
-                    className={`px-4 py-2 rounded-lg cursor-pointer transition text-lg md:text-base font-semibold ${
-                      !product._id || item.quantity >= (product.quantity || 999)
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-400 hover:bg-green-500"
-                    }`}
+                    className="px-4 py-2 rounded-lg cursor-pointer transition text-lg md:text-base font-semibold bg-green-400 hover:bg-green-500"
                   >
                     +
                   </button>
@@ -121,7 +115,6 @@ export default function CartPage() {
                     product._id && removeItemAPI(dispatch, product._id)
                   }
                   className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 transition text-base md:text-sm"
-                  disabled={!product._id}
                 >
                   Remove
                 </button>
@@ -149,4 +142,3 @@ export default function CartPage() {
     </div>
   );
 }
-
