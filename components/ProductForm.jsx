@@ -98,6 +98,7 @@ export default function ProductForm({ onRefresh }) {
     "Hair Care",
     "Skincare",
     "Gaming",
+    "Grocery",
     "Pet Supplies",
     "Music",
     "Automotive",

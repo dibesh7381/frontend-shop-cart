@@ -114,7 +114,7 @@ export default function Navbar() {
               {desktopProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setDesktopProfileOpen(false)}>Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white cursor-pointer hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
@@ -142,7 +142,7 @@ export default function Navbar() {
               {mobileProfileOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-blue-800 rounded shadow-lg py-1 z-50">
                   <Link to="/profile" className="block px-4 py-2 text-white hover:bg-blue-700" onClick={() => setMobileProfileOpen(false)}>Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-white hover:bg-blue-700">Logout</button>
+                  <button onClick={handleLogout} className="w-full text-left cursor-pointer px-4 py-2 text-white hover:bg-blue-700">Logout</button>
                 </div>
               )}
             </div>
@@ -175,7 +175,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/profile" className={`${navLink} px-4 py-3`} onClick={() => setSidebarOpen(false)}>Profile</Link>
-              <button onClick={handleLogout} className="text-left px-4 py-3 hover:bg-blue-700 cursor-pointer">Logout</button>
+              <button onClick={handleLogout} className="text-left cursor-pointer px-4 py-3 hover:bg-blue-700 cursor-pointer">Logout</button>
             </>
           )}
         </nav>

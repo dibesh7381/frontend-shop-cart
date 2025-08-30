@@ -79,7 +79,7 @@ export default function ProductCard({ product, onRefresh }) {
   const categories = [
     "Soap","Dress","Electronics","Food","Books","Shoes","Cosmetics","Toys",
     "Mobiles","Laptops","Watches","Bags","Home Decor","Furniture","Kitchen Appliances",
-    "Sports","Stationery","Jewelry","Hair Care","Skincare","Gaming","Pet Supplies",
+    "Sports","Stationery","Jewelry","Hair Care","Skincare","Gaming","Grocery","Pet Supplies",
     "Music","Automotive","Baby Products","Health & Wellness",
   ];
 
