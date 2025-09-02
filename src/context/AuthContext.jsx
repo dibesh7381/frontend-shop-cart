@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
       const data = await res.json();
       if (data.user) {
         setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user)); // 🟢 save logged-in user
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
     } catch (err) {
       console.error(err);
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       setUser(null);
     } finally {
       setLoading(false);
-      fetchCartAPI(dispatch); // 🟢 reload cart after user set
+      fetchCartAPI(dispatch);
     }
   };
 
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    fetchCartAPI(dispatch); // 🟢 load guest cart
+    fetchCartAPI(dispatch);
   };
 
   return (
