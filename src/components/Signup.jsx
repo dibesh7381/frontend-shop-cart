@@ -13,7 +13,7 @@ export default function Signup() {
     setServerError("");
 
     try {
-      const res = await fetch("https://backend-shop-cart.onrender.com/signup", {
+      const res = await fetch("https://backend-shop-cart.onrender.com/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

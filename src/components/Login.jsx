@@ -10,40 +10,39 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const {  fetchUser } = useAuth();
 
-  const onSubmit = async (data) => {
-    clearErrors("apiError");
-    setSuccessMessage("");
-    setIsLoading(true);
+const onSubmit = async (data) => {
+  clearErrors("apiError");
+  setSuccessMessage("");
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("https://backend-shop-cart.onrender.com/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  try {
+    const res = await fetch("https://backend-shop-cart.onrender.com/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-      const result = await res.json();
+    const result = await res.json();
 
-      if (!res.ok) {
-        setError("apiError", { message: result.message || "Invalid credentials" });
-        return;
-      }
-
-
-      localStorage.setItem("token", result.token);
-
-  
-      await fetchUser(); 
-
-      setSuccessMessage(result.message || "Login successful");
-
-      setTimeout(() => navigate("/"), 1500);
-    } catch (err) {
-      setError("apiError", { message: err.message || "Something went wrong" });
-    } finally {
-      setIsLoading(false);
+    if (!res.ok) {
+      setError("apiError", { message: result.message || "Invalid credentials" });
+      return;
     }
-  };
+
+    localStorage.setItem("token", result.token);
+
+    await fetchUser();
+
+    setSuccessMessage(result.message || "Login successful");
+
+    setTimeout(() => navigate("/"), 1500);
+  } catch (err) {
+    setError("apiError", { message: err.message || "Something went wrong" });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
